@@ -30,10 +30,10 @@ for i in xrange(numPolys):
     for j in range(3):
         connectivity[i,j] = ids.GetId(j)
 
-# 
+# Create octree structure for stl poly mesh
 tree = octree.PyOctree(pointCoords,connectivity)
 
-# Visualise octree
+# Visualise octree using Paraview
 def getOctreeRep(octnode):
     global connect, numVerts, pc
     if not octnode.isLeaf:
