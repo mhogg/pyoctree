@@ -160,7 +160,7 @@ cdef class PyOctnode:
     def __dealloc__(self):
         # No need to dealloc - cOctNodes are managed by cOctree
         pass          
-            
+
 
 cdef class PyTri:
     cdef cTri *thisptr
@@ -188,7 +188,13 @@ cdef PyTri_Init(cTri *tri):
     result = PyTri()
     result.thisptr = tri
     return result
-    
-    
+
+cdef class Tri:
+    cdef cTri *thisptr
+    def __cinit__(self):
+        self.thisptr = new cTri()
+    def __dealloc__(self):
+        print "Deallocating Tri"
+        del self.thisptr
 
         

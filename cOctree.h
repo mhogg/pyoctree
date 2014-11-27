@@ -70,6 +70,7 @@ public:
     vector<double> getPositionRoot();
     double getSizeRoot();
     void splitNodeAndReallocate(cOctNode &node);
+	void deleteBranches(cOctNode &node);
 };
 
 class CLine {

@@ -70,7 +70,9 @@ cTri::cTri(int _label, vector<vector<double> > _vertices)
     getUpperVert();
 }
 
-cTri::~cTri() {}
+cTri::~cTri() {
+    //cout << "Destroying cTri" << endl;
+}
 
 void cTri::getN()
 {
@@ -220,8 +222,6 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     insertPolys();
 }
 
-cOctree::~cOctree() {}
-
 void cOctree::setupPolyList()
 {
     int indx;
@@ -336,6 +336,43 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
         }
     }
     node.data.resize(0);
+}
+
+cOctree::~cOctree() 
+{
+    cout << "Destroying the cOctree" << endl;
+    deleteBranches(root);
+	delete &root;
+}
+
+/*
+void cOctree::deleteBranches(cOctNode &node)
+{
+    // Delete all branches in the cOctree
+    for (int i=0; i<node.branches.size(); i++) 
+	{
+	    cOctNode *branch = &node.branches[i];
+		if (node.branches[i].isLeafNode()) {
+		    delete &node.branches[i];
+		} else {
+		    deleteBranches(node.branches[i]);
+		}
+	}
+}*/
+
+void cOctree::deleteBranches(cOctNode &node)
+{
+    // Delete all branches in the cOctree
+    for (int i=0; i<node.branches.size(); i++) 
+	{
+	    cOctNode *branch = &node.branches[i];
+		if (branch->isLeafNode()) {
+		    cout << branch->level << "-" << branch->nid << endl;
+		    delete branch;
+		} else {
+		    deleteBranches(*branch);
+		}
+	}
 }
 
 // ------------------------------------------------------
