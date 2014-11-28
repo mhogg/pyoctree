@@ -43,7 +43,7 @@ cdef extern from "cOctree.h":
     cdef cppclass cOctNode:
         double size
         int level
-        int nid
+        string nid
         vector[double] position
         vector[cOctNode] branches
         vector[int] data        
@@ -55,12 +55,12 @@ cdef extern from "cOctree.h":
         int numPolys()
         cOctNode root
     
-    cdef double dotProduct( vector[double] v1, vector[double] v2 )
-    cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
-    cdef vector[double] vectSubtract( vector[double] a, vector[double] b )
-    cdef vector[double] vectAdd( vector[double] a, vector[double] b )
-    cdef vector[double] vectAdd( vector[double] a, vector[double] b, double sf )
-    cdef double distBetweenPoints( vector[double] a, vector[double] b )   
+    #cdef double dotProduct( vector[double] v1, vector[double] v2 )
+    #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
+    #cdef vector[double] vectSubtract( vector[double] a, vector[double] b )
+    #cdef vector[double] vectAdd( vector[double] a, vector[double] b )
+    #cdef vector[double] vectAdd( vector[double] a, vector[double] b, double sf )
+    #cdef double distBetweenPoints( vector[double] a, vector[double] b )   
         
                     
 cdef class PyOctree:
@@ -87,8 +87,8 @@ cdef class PyOctree:
             for j in range(3):
                 connect[j] = _polyConnectivity[i,j]
             polyConnectivity.push_back(connect)
-        
-        self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)       
+
+        self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)
         
     property numPolys:
         def __get__(self):
@@ -102,6 +102,7 @@ cdef class PyOctree:
             return root
             
     def __dealloc__(self):
+        print "Deallocating PyOctree"
         del self.thisptr            
 
               
@@ -113,11 +114,11 @@ cdef class PyOctnode:
         # self.thisptr will be set by global function PyOctnode_Init to point
         # to an existing cOctNode object
         self.thisptr = NULL
-    def __init__(self):
-        pass
+
     property isLeaf:
         def __get__(self):
             return self.thisptr.isLeafNode()  
+
     property branches:
         def __get__(self):
             branches = []
@@ -129,6 +130,7 @@ cdef class PyOctnode:
                 branches.append(PyOctnode_Init(node))
             node = NULL
             return branches 
+
     property polyList:
         def __get__(self):
             cdef list polyList = []
@@ -137,18 +139,23 @@ cdef class PyOctnode:
             for i in range(numPolys):
                 polyList.append(self.thisptr.data[i])
             return polyList
+
     property level:
         def __get__(self):
             return self.thisptr.level  
+
     property nid:
         def __get__(self):
-            return self.thisptr.nid                                   
+            return self.thisptr.nid  
+                                 
     property numPolys:
         def __get__(self):
             return self.thisptr.numPolys()
+
     property size:
         def __get__(self):
             return self.thisptr.size
+
     property position:
         def __get__(self):
             cdef int dims = self.thisptr.position.size()
@@ -157,6 +164,7 @@ cdef class PyOctnode:
             for i in range(dims):
                 position[i] = self.thisptr.position[i]
             return position
+
     def __dealloc__(self):
         # No need to dealloc - cOctNodes are managed by cOctree
         pass          
@@ -189,12 +197,5 @@ cdef PyTri_Init(cTri *tri):
     result.thisptr = tri
     return result
 
-cdef class Tri:
-    cdef cTri *thisptr
-    def __cinit__(self):
-        self.thisptr = new cTri()
-    def __dealloc__(self):
-        print "Deallocating Tri"
-        del self.thisptr
 
         

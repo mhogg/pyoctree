@@ -62,7 +62,7 @@ cTri::cTri()
 
 cTri::cTri(int _label, vector<vector<double> > _vertices)
 {
-    label = _label;
+    label    = _label;
     vertices = _vertices;
     getN();
     getD();
@@ -150,14 +150,14 @@ cOctNode::cOctNode()
 {  
     setupConstants();
     level = 0;
-    nid   = 0;
-    position.resize(3,0.0);
+    nid   = "";
     size  = 1.0;
+    position.resize(3,0.0);
     getLowUppVerts();
     data.reserve(MAX_OCTNODE_OBJECTS);
 }
 
-cOctNode::cOctNode(int _level, int _nid, vector<double> _position, double _size)
+cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
 {
     setupConstants();
     level    = _level;
@@ -168,7 +168,9 @@ cOctNode::cOctNode(int _level, int _nid, vector<double> _position, double _size)
     data.reserve(MAX_OCTNODE_OBJECTS);    
 }
 
-cOctNode::~cOctNode() {}
+cOctNode::~cOctNode() {
+    cout << "Calling destructor for cOctnode " << nid << endl;
+}
 
 void cOctNode::setupConstants() 
 {
@@ -193,9 +195,9 @@ void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
 
 int cOctNode::numPolys() { return data.size(); }
 
-cOctNode cOctNode::addNode(int _level, int _nid, vector<double> _position, double _size)
+void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
 {
-    return cOctNode(_level,_nid,_position,_size);
+    branches.push_back(cOctNode(_level,_nid,_position,_size));
 }
 
 // ------------------------------------------------------
@@ -218,7 +220,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     setupPolyList();    
     vector<double> position = getPositionRoot();
     double size = getSizeRoot();
-    root = cOctNode(1, 0, position, size);
+    root = cOctNode(0,"0", position, size);
     insertPolys();
 }
 
@@ -228,7 +230,7 @@ void cOctree::setupPolyList()
     vector<vector<double> > vertices(3,vector<double>(3,0.0));
     
     polyList.reserve(polyConnectivity.size());
-    for (int i=0; i<polyConnectivity.size(); i++) {
+    for (unsigned int i=0; i<polyConnectivity.size(); i++) {
         for (int j=0; j<3; j++) {
             indx = polyConnectivity[i][j];
             vertices[j] = vertexCoords3D[indx]; }
@@ -256,7 +258,7 @@ void cOctree::insertPoly(cOctNode &node, cTri &poly)
         
     } else {
       
-        for (int i=0; i<node.branches.size(); i++) {
+        for (unsigned int i=0; i<node.branches.size(); i++) {
             insertPoly(node.branches[i],poly);
         }
         
@@ -276,7 +278,7 @@ vector<double> cOctree::getPositionRoot() {
     vector<double> low, upp, position(3);
     low = vertexCoords3D[0];
     upp = vertexCoords3D[0];
-    for (int i=1; i<vertexCoords3D.size(); i++) {
+    for (unsigned int i=1; i<vertexCoords3D.size(); i++) {
         for (int j=0; j<3; j++) {
             if (vertexCoords3D[i][j] < low[j]) { low[j] = vertexCoords3D[i][j]; }
             if (vertexCoords3D[i][j] > upp[j]) { upp[j] = vertexCoords3D[i][j]; }
@@ -295,7 +297,7 @@ double cOctree::getSizeRoot() {
     vector<double> low, upp, range;
     low = vertexCoords3D[0];
     upp = vertexCoords3D[0];
-    for (int i=1; i<vertexCoords3D.size(); i++) {
+    for (unsigned int i=1; i<vertexCoords3D.size(); i++) {
         for (int j=0; j<3; j++) {
             if (vertexCoords3D[i][j] < low[j]) { low[j] = vertexCoords3D[i][j]; }
             if (vertexCoords3D[i][j] > upp[j]) { upp[j] = vertexCoords3D[i][j]; }
@@ -319,13 +321,14 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
     for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
         for (int j=0; j<3; j++) {
             position[j] = node.position[j] + 0.25*node.size*branchOffsets[i][j]; }
-        node.branches.push_back(node.addNode(node.level+1,i,position,0.5*node.size)); 
+        string nid = node.nid + "-" + NumberToString(i);
+        node.addNode(node.level+1,nid,position,0.5*node.size); 
     }
     
     // Reallocate date from node to branches
     for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
         for (int j=0; j<node.numPolys(); j++) {
-            int indx  = node.data[j];
+            int indx = node.data[j];
             if (polyList[indx].isInNode(node.branches[i])) {
                 if (node.branches[i].numPolys() < node.MAX_OCTNODE_OBJECTS) {
                     node.branches[i].addPoly(indx);
@@ -341,38 +344,6 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
 cOctree::~cOctree() 
 {
     cout << "Destroying the cOctree" << endl;
-    deleteBranches(root);
-	delete &root;
-}
-
-/*
-void cOctree::deleteBranches(cOctNode &node)
-{
-    // Delete all branches in the cOctree
-    for (int i=0; i<node.branches.size(); i++) 
-	{
-	    cOctNode *branch = &node.branches[i];
-		if (node.branches[i].isLeafNode()) {
-		    delete &node.branches[i];
-		} else {
-		    deleteBranches(node.branches[i]);
-		}
-	}
-}*/
-
-void cOctree::deleteBranches(cOctNode &node)
-{
-    // Delete all branches in the cOctree
-    for (int i=0; i<node.branches.size(); i++) 
-	{
-	    cOctNode *branch = &node.branches[i];
-		if (branch->isLeafNode()) {
-		    cout << branch->level << "-" << branch->nid << endl;
-		    delete branch;
-		} else {
-		    deleteBranches(*branch);
-		}
-	}
 }
 
 // ------------------------------------------------------
@@ -427,6 +398,14 @@ vector<double> vectSubtract( vector<double> &a, vector<double> &b )
     for (unsigned int i=0; i<a.size(); i++)
         c[i] = a[i]-b[i];
     return c;
+}
+
+string NumberToString( int Number )
+{
+    // Converts integer to string
+    ostringstream ss;
+    ss << Number;
+    return ss.str();
 }
 
 // ------------------------------------------------------
