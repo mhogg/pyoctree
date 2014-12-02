@@ -55,6 +55,8 @@ cdef extern from "cOctree.h":
         int numPolys()
         cOctNode root
         vector[cTri] polyList
+        cOctNode* getNodeFromLabel(int polyLabel)
+        cOctNode* getNodeFromId(string nodeId)
     
     #cdef double dotProduct( vector[double] v1, vector[double] v2 )
     #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
@@ -106,6 +108,20 @@ cdef class PyOctree:
             tri = &self.thisptr.polyList[i]
             self.polyList.append(PyTri_Init(tri))
         
+    def getNodeFromLabel(self,int label):
+        cdef cOctNode *node = self.thisptr.getNodeFromLabel(label)
+        if node is NULL:
+            return None
+        else:
+            return PyOctnode_Init(node,self)
+            
+    def getNodeFromId(self,string nodeId):
+        cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId)
+        if node is NULL:
+            return None
+        else:
+            return PyOctnode_Init(node,self)            
+    
     property numPolys:
         def __get__(self):
             return self.thisptr.numPolys()

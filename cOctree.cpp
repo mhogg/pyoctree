@@ -71,7 +71,7 @@ cTri::cTri(int _label, vector<vector<double> > _vertices)
 }
 
 cTri::~cTri() {
-    cout << "Destroying cTri" << endl;
+    //cout << "Destroying cTri" << endl;
 }
 
 void cTri::getN()
@@ -229,7 +229,6 @@ void cOctree::setupPolyList()
     int indx;
     vector<vector<double> > vertices(3,vector<double>(3,0.0));
     
-    cout << "setupPolyList started" << endl;
     polyList.reserve(polyConnectivity.size());
     for (unsigned int i=0; i<polyConnectivity.size(); i++) {
         for (int j=0; j<3; j++) {
@@ -237,7 +236,6 @@ void cOctree::setupPolyList()
             vertices[j] = vertexCoords3D[indx]; }
         polyList.push_back(cTri(i,vertices)); 
     }
-    cout << "setupPolyList ended" << endl;
 }
 
 int cOctree::numPolys() { return polyList.size(); }
@@ -345,10 +343,10 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
 
 cOctNode* cOctree::getNodeFromLabel(int polyLabel)
 {
-    return findBranch(polyLabel,root);
+    return findBranchByLabel(polyLabel,root);
 }
 
-cOctNode* cOctree::findBranch(int polyLabel, cOctNode &node)
+cOctNode* cOctree::findBranchByLabel(int polyLabel, cOctNode &node)
 {
     if (node.isLeafNode()) {
 	    vector<int>::iterator it;
@@ -356,12 +354,29 @@ cOctNode* cOctree::findBranch(int polyLabel, cOctNode &node)
 		if (it != node.data.end()) { 
 		    return &node; }
 	} else {
-	    for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
-		    cOctNode *branch = &node.branches[i];
-		    bool foundLabel  = findBranch(polyLabel, *branch);
-			if (foundLabel) { return branch; }
+	    for (unsigned int i=0; i<node.branches.size(); i++) {
+		    cOctNode *branch = findBranchByLabel(polyLabel, node.branches[i]);
+			if (branch != NULL) { return branch; }
 		}
 	}
+	return NULL;
+}
+
+cOctNode* cOctree::getNodeFromId(string nodeId)
+{
+    return findBranchById(nodeId,root);
+}
+
+cOctNode* cOctree::findBranchById(string nodeId, cOctNode &node)
+{
+    if (nodeId.compare(node.nid)==0) {
+        return &node;
+    } else {
+        for (unsigned int i=0; i<node.branches.size(); i++) {
+		    cOctNode *branch = findBranchById(nodeId, node.branches[i]);
+			if (branch != NULL) { return branch; }
+        }
+    }
 	return NULL;
 }
 
