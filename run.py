@@ -23,7 +23,7 @@ for i in xrange(numPoints):
     
 # Get polygon connectivity
 numPolys     = stl.GetNumberOfCells()
-connectivity = np.zeros((numPolys,3),dtype=int)
+connectivity = np.zeros((numPolys,3),dtype=np.int32)
 for i in xrange(numPolys):
     tri = stl.GetCell(i)
     ids = tri.GetPointIds()
@@ -80,3 +80,4 @@ writer.SetFileName('octree.vtu')
 writer.SetInput(uGrid)
 writer.SetDataModeToAscii()
 writer.Write()
+

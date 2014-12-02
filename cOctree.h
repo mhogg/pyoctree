@@ -5,29 +5,30 @@
 #include <stdio.h>
 #include <math.h>
 #include <string>
+#include <sstream>
+#include <algorithm> // find
 
 using namespace std;
 
 class cOctNode {
 public:
 
+    double size;
     int MAX_OCTNODE_OBJECTS;
     int NUM_BRANCHES_OCTNODE;    
-    double size;
+    int level;
+    string nid;
     vector<double> position;
     vector<cOctNode> branches;
-    int level;
-    int nid;
     vector<int> data;
     vector<double> low, upp;
-    
     cOctNode();
-    cOctNode(int _level, int _nid, vector<double> _position, double _size);
+    cOctNode(int _level, string _nid, vector<double> _position, double _size);
     ~cOctNode();
     bool isLeafNode();
-    void addPoly(int _indx);
-    cOctNode addNode(int _level, int _nid, vector<double> _position, double size);
     int numPolys();
+    void addPoly(int _indx);
+    void addNode(int _level, string _nid, vector<double> _position, double _size);
     void getLowUppVerts();
     void setupConstants();
 };
@@ -35,13 +36,13 @@ public:
 class cTri {
 public:
 
+    double D;
     int label;
     vector<vector<double> > vertices;
     vector<double> N;
-    double D;
     vector<double> lowVert, uppVert;
     cTri();
-    cTri(int label, vector<vector<double> > _vertices);
+    cTri(int _label, vector<vector<double> > _vertices);
     ~cTri();
     void getN();
     void getD();
@@ -60,17 +61,17 @@ public:
     vector<vector<double> > vertexCoords3D;
     vector<vector<int> > polyConnectivity;
     vector<cTri> polyList;
-   
     cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity);
     ~cOctree();    
+    double getSizeRoot();
     int numPolys();
+    vector<double> getPositionRoot();
     void insertPoly(cOctNode &node, cTri &poly);
     void insertPolys();
     void setupPolyList();
-    vector<double> getPositionRoot();
-    double getSizeRoot();
     void splitNodeAndReallocate(cOctNode &node);
-	void deleteBranches(cOctNode &node);
+    cOctNode* getNodeFromLabel(int polyLabel);
+	cOctNode* findBranch(int polyLabel, cOctNode &node);
 };
 
 class CLine {
@@ -86,7 +87,9 @@ public:
 // Function prototypes
 double dotProduct( vector<double> &v1, vector<double> &v2 );
 double distBetweenPoints(vector<double> &p1, vector<double> &p2);
+string NumberToString( int Number );
 vector<double> crossProduct( vector<double> &v1, vector<double> &v2 );
 vector<double> vectAdd( vector<double> &a, vector<double> &b);
 vector<double> vectAdd( vector<double> &a, vector<double> &b, double sf);
 vector<double> vectSubtract( vector<double> &a, vector<double> &b );
+
