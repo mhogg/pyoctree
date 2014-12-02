@@ -169,7 +169,7 @@ cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _si
 }
 
 cOctNode::~cOctNode() {
-    cout << "Calling destructor for cOctnode " << nid << endl;
+    //cout << "Calling destructor for cOctnode " << nid << endl;
 }
 
 void cOctNode::setupConstants() 
@@ -341,9 +341,31 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
     node.data.resize(0);
 }
 
+cOctNode* cOctree::getNodeFromLabel(int polyLabel)
+{
+    return findBranch(polyLabel,root);
+}
+
+cOctNode* cOctree::findBranch(int polyLabel, cOctNode &node)
+{
+    if (node.isLeafNode()) {
+	    vector<int>::iterator it;
+	    it = find(node.data.begin(),node.data.end(),polyLabel);
+		if (it != node.data.end()) { 
+		    return &node; }
+	} else {
+	    for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+		    cOctNode *branch = &node.branches[i];
+		    bool foundLabel  = findBranch(polyLabel, *branch);
+			if (foundLabel) { return branch; }
+		}
+	}
+	return NULL;
+}
+
 cOctree::~cOctree() 
 {
-    cout << "Destroying the cOctree" << endl;
+    //cout << "Destroying the cOctree" << endl;
 }
 
 // ------------------------------------------------------

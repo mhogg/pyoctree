@@ -1,7 +1,7 @@
 
 # cython: profile=True
 
-import string as pystring
+#import string as pystring
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -54,6 +54,7 @@ cdef extern from "cOctree.h":
         cOctree(vector[vector[double]] vertexCoords3D, vector[vector[int]] polyConnectivity)
         int numPolys()
         cOctNode root
+        vector[cTri] polyList
     
     #cdef double dotProduct( vector[double] v1, vector[double] v2 )
     #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
@@ -66,6 +67,8 @@ cdef extern from "cOctree.h":
 cdef class PyOctree:
 
     cdef cOctree *thisptr
+    cdef public PyOctnode root
+    cdef public list polyList
 
     def __cinit__(self,double[:,::1] _vertexCoords3D, int[:,::1] _polyConnectivity):
 
@@ -87,33 +90,40 @@ cdef class PyOctree:
             for j in range(3):
                 connect[j] = _polyConnectivity[i,j]
             polyConnectivity.push_back(connect)
-
+            
+        # Create cOctree
         self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)
+            
+        # Get root node
+        cdef cOctNode *node = &self.thisptr.root
+        self.root = PyOctnode_Init(node,self)
+        node = NULL
+        
+        # Get polyList
+        self.polyList = []
+        cdef cTri *tri 
+        for i in range(self.thisptr.polyList.size()):
+            tri = &self.thisptr.polyList[i]
+            self.polyList.append(PyTri_Init(tri))
         
     property numPolys:
         def __get__(self):
-            return self.thisptr.numPolys()    
-        
-    property root:
-        def __get__(self):
-            cdef cOctNode *node = &self.thisptr.root
-            cdef PyOctnode root = PyOctnode_Init(node)
-            node = NULL
-            return root
-            
+            return self.thisptr.numPolys()
+                
     def __dealloc__(self):
-        print "Deallocating PyOctree"
         del self.thisptr            
 
               
 cdef class PyOctnode:
     
     cdef cOctNode *thisptr
+    cdef public object parent
 
-    def __cinit__(self):
+    def __cinit__(self,parent):
         # self.thisptr will be set by global function PyOctnode_Init to point
         # to an existing cOctNode object
         self.thisptr = NULL
+        self.parent  = parent
 
     property isLeaf:
         def __get__(self):
@@ -127,7 +137,7 @@ cdef class PyOctnode:
             cdef cOctNode *node = NULL 
             for i in range(numBranches):
                 node = &self.thisptr.branches[i]
-                branches.append(PyOctnode_Init(node))
+                branches.append(PyOctnode_Init(node,self))
             node = NULL
             return branches 
 
@@ -139,6 +149,15 @@ cdef class PyOctnode:
             for i in range(numPolys):
                 polyList.append(self.thisptr.data[i])
             return polyList
+            
+    property polyListAsString:
+        def __get__(self):
+            cdef int numPolys = self.thisptr.numPolys()
+            cdef int i
+            s = str(self.thisptr.data[0])
+            for i in range(1, numPolys):
+                s += ", " + str(self.thisptr.data[i])
+            return s
 
     property level:
         def __get__(self):
@@ -179,14 +198,32 @@ cdef class PyTri:
             return self.thisptr.label
         def __set__(self,label):
             self.thisptr.label = label 
+    property vertices:
+        def __get__(self):
+            cdef np.ndarray[float64,ndim=2] vertices = np.zeros((3,3))
+            cdef int i, j
+            for i in range(3):
+                for j in range(3):
+                    vertices[i,j] = self.thisptr.vertices[i][j]
+            return vertices
+    property N:
+        def __get__(self):
+            cdef np.ndarray[float64,ndim=1] N = np.zeros(3)
+            cdef int i
+            for i in range(3):
+                N[i] = self.thisptr.N[i]
+            return N
+    property D:
+        def __get__(self):
+            return self.thisptr.D	
     def __dealloc__(self):
         # No need to dealloc - cTris are managed by cOctree
         pass
 
 
 # Need a global function to be able to point a cOctNode to a PyOctnode
-cdef PyOctnode_Init(cOctNode *node):
-    result = PyOctnode()
+cdef PyOctnode_Init(cOctNode *node, object parent):
+    result = PyOctnode(parent)
     result.thisptr = node
     return result
 

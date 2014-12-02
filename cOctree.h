@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string>
 #include <sstream>
+#include <algorithm> // find
 
 using namespace std;
 
@@ -69,6 +70,8 @@ public:
     void insertPolys();
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
+    cOctNode* getNodeFromLabel(int polyLabel);
+	cOctNode* findBranch(int polyLabel, cOctNode &node);
 };
 
 class CLine {
