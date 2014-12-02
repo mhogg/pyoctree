@@ -1,6 +1,4 @@
 
-# cython: profile=True
-
 import string as pystring
 import numpy as np
 cimport numpy as np
@@ -34,7 +32,7 @@ cdef extern from "cOctree.h":
         vector[vector[double]] vertices
         vector[double] N
         double D
-        cTri()
+        #cTri()
         cTri(int label, vector[vector[double]] vertices)
         void getN()
         void getD()
@@ -67,8 +65,9 @@ cdef class PyOctree:
 
     cdef cOctree *thisptr
 
-    def __cinit__(self,double[:,::1] _vertexCoords3D, int[:,::1] _polyConnectivity):
-
+    #def __cinit__(self,double[:,::1] _vertexCoords3D, int[:,::1] _polyConnectivity):
+    def __cinit__(self,np.ndarray[float64,ndim=2] _vertexCoords3D, np.ndarray[int32,ndim=2] _polyConnectivity):
+    
         cdef int i, j
         cdef vector[double] coords
         cdef vector[vector[double]] vertexCoords3D
@@ -88,7 +87,7 @@ cdef class PyOctree:
                 connect[j] = _polyConnectivity[i,j]
             polyConnectivity.push_back(connect)
         
-        self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)       
+        self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)
         
     property numPolys:
         def __get__(self):
@@ -102,6 +101,7 @@ cdef class PyOctree:
             return root
             
     def __dealloc__(self):
+        print "Deallocating octree"
         del self.thisptr            
 
               
@@ -192,9 +192,40 @@ cdef PyTri_Init(cTri *tri):
 cdef class Tri:
     cdef cTri *thisptr
     def __cinit__(self):
-        self.thisptr = new cTri()
+        cdef vector[double] verts
+        cdef vector[vector[double]] vertices
+        cdef int i, label
+        verts.resize(3)
+        for i in range(3):
+            verts[i] = 0.0
+        vertices.push_back(verts)
+        verts[0] = 1.0
+        vertices.push_back(verts)
+        verts[1] = 1.0
+        vertices.push_back(verts)
+        label = 1
+        self.thisptr = new cTri(label,vertices)
+        #self.thisptr = new cTri()
     def __dealloc__(self):
         print "Deallocating Tri"
         del self.thisptr
+    property label:
+        def __get__(self):
+            return self.thisptr.label
+        def __set__(self,label):
+            self.thisptr.label = label 
+    property vertices:
+        def __get__(self):
+            cdef int i, numVerts
+            cdef np.ndarray[float64,ndim=2] vertices 
+            numVerts = self.thisptr.vertices.size()
+            ndims    = self.thisptr.vertices[0].size()
+            vertices = np.zeros((numVerts,ndims),dtype=np.float64)
+            for i in range(numVerts):
+                for j in range(ndims):
+                    vertices[i,j] = self.thisptr.vertices[i][j]
+            return vertices
+            
+    
 
         

@@ -71,7 +71,7 @@ cTri::cTri(int _label, vector<vector<double> > _vertices)
 }
 
 cTri::~cTri() {
-    //cout << "Destroying cTri" << endl;
+    cout << "Destroying cTri" << endl;
 }
 
 void cTri::getN()
@@ -227,6 +227,7 @@ void cOctree::setupPolyList()
     int indx;
     vector<vector<double> > vertices(3,vector<double>(3,0.0));
     
+    cout << "setupPolyList started" << endl;
     polyList.reserve(polyConnectivity.size());
     for (int i=0; i<polyConnectivity.size(); i++) {
         for (int j=0; j<3; j++) {
@@ -234,6 +235,7 @@ void cOctree::setupPolyList()
             vertices[j] = vertexCoords3D[indx]; }
         polyList.push_back(cTri(i,vertices)); 
     }
+    cout << "setupPolyList ended" << endl;
 }
 
 int cOctree::numPolys() { return polyList.size(); }
