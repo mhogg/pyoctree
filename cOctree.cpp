@@ -220,7 +220,7 @@ cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _
     setupPolyList();    
     vector<double> position = getPositionRoot();
     double size = getSizeRoot();
-    root = cOctNode(0,"0", position, size);
+    root = cOctNode(1,"0", position, size);
     insertPolys();
 }
 
