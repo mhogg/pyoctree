@@ -341,6 +341,33 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
     node.data.resize(0);
 }
 
+// ----------------------------------------------------------------------------
+
+vector<cOctNode*> cOctree::getNodesFromLabel(int polyLabel)
+{
+    // Function for finding all the nodes that contains tri with given label 
+    vector<cOctNode*> nodeList;
+    findBranchesByLabel(polyLabel,root,nodeList);
+    return nodeList;
+}
+
+void cOctree::findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList)
+{
+    // Recursive function used by getNodesFromLabel
+    if (node.isLeafNode()) {
+	    vector<int>::iterator it;
+	    it = find(node.data.begin(),node.data.end(),polyLabel);
+		if (it != node.data.end()) { nodeList.push_back(&node); }
+	} else {
+	    for (unsigned int i=0; i<node.branches.size(); i++) {
+		    findBranchesByLabel(polyLabel, node.branches[i], nodeList);
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+
+/*
 cOctNode* cOctree::getNodeFromLabel(int polyLabel)
 {
     return findBranchByLabel(polyLabel,root);
@@ -361,6 +388,7 @@ cOctNode* cOctree::findBranchByLabel(int polyLabel, cOctNode &node)
 	}
 	return NULL;
 }
+*/
 
 cOctNode* cOctree::getNodeFromId(string nodeId)
 {

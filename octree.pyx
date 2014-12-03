@@ -57,6 +57,7 @@ cdef extern from "cOctree.h":
         vector[cTri] polyList
         cOctNode* getNodeFromLabel(int polyLabel)
         cOctNode* getNodeFromId(string nodeId)
+        vector[cOctNode*] getNodesFromLabel(int polyLabel)
     
     #cdef double dotProduct( vector[double] v1, vector[double] v2 )
     #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
@@ -108,12 +109,25 @@ cdef class PyOctree:
             tri = &self.thisptr.polyList[i]
             self.polyList.append(PyTri_Init(tri))
         
-    def getNodeFromLabel(self,int label):
-        cdef cOctNode *node = self.thisptr.getNodeFromLabel(label)
-        if node is NULL:
-            return None
+    #def getNodeFromLabel(self,int label):
+    #    cdef cOctNode *node = self.thisptr.getNodeFromLabel(label)
+    #    if node is NULL:
+    #        return None
+    #    else:
+    #        return PyOctnode_Init(node,self)
+            
+    def getNodesFromLabel(self,int label):
+        cdef cOctNode *node = NULL
+        cdef vector[cOctNode*] nodes = self.thisptr.getNodesFromLabel(label)
+        cdef int i
+        cdef list nodeList = []
+        for i in range(nodes.size()):
+            node = nodes[i]
+            nodeList.append(PyOctnode_Init(node,self))
+        if len(nodeList)==1:
+            return nodeList[0]
         else:
-            return PyOctnode_Init(node,self)
+            return nodeList         
             
     def getNodeFromId(self,string nodeId):
         cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId)
@@ -141,7 +155,16 @@ cdef class PyOctnode:
         # to an existing cOctNode object
         self.thisptr = NULL
         self.parent  = parent
-
+        
+    def hasPolyLabel(self,label):
+        """ Checks if poly with given label is in node """
+        cdef int numPolys  = self.thisptr.numPolys()
+        cdef int i
+        for i in range(numPolys):
+            if self.thisptr.data[i]==label: 
+                return True
+        return False  
+        
     property isLeaf:
         def __get__(self):
             return self.thisptr.isLeafNode()  

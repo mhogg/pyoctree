@@ -70,10 +70,12 @@ public:
     void insertPolys();
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
-    cOctNode* getNodeFromLabel(int polyLabel);
-	cOctNode* findBranchByLabel(int polyLabel, cOctNode &node);
+    //cOctNode* getNodeFromLabel(int polyLabel);
+	//cOctNode* findBranchByLabel(int polyLabel, cOctNode &node);
     cOctNode* getNodeFromId(string nodeId);
     cOctNode* findBranchById(string nodeId, cOctNode &node);
+    vector<cOctNode*> getNodesFromLabel(int polyLabel);
+    void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
 };
 
 class CLine {
