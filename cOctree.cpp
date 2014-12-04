@@ -3,14 +3,14 @@
 
 // ------------------------------------------------------
 
-CLine::CLine() 
+cLine::cLine() 
 {
     // Default line is unit vector along x-axis
     p0.resize(3,0.0); p1.resize(3,0.0); dir.resize(3,0.0);
     p1[0]=1.0; dir[0]=1.0;
 }
 
-CLine::CLine(vector<double> &lp0, vector<double> &p1_dir, int isP1orDir)
+cLine::cLine(vector<double> &lp0, vector<double> &p1_dir, int isP1orDir)
 {
     // if isP1orDir==0, then p1_dir is p1
     // if isP1orDir==1, then p1_dir is dir
@@ -23,9 +23,9 @@ CLine::CLine(vector<double> &lp0, vector<double> &p1_dir, int isP1orDir)
         getP1(); }
 }
 
-CLine::~CLine() {}
+cLine::~cLine() {}
 
-void CLine::getDir()
+void cLine::getDir()
 {
     vector<double> p0p1(3); double dmag=0.0;
     for (unsigned int i=0; i<3; i++) {
@@ -37,7 +37,7 @@ void CLine::getDir()
         *it /= dmag; 
 }
 
-void CLine::getP1()
+void cLine::getP1()
 {
     vector<double> p1(3);
     for (unsigned int i=0; i<3; i++)
@@ -119,20 +119,6 @@ void cTri::getUpperVert()
     } 
 } 
 
-bool cTri::isInNode(vector<vector<double> > &lowUppVerts)
-{
-    vector<double> nodelow, nodeupp;
-    nodelow = lowUppVerts[0];
-    nodeupp = lowUppVerts[1];
-    if (lowVert[0] > nodeupp[0]) return false;
-    if (lowVert[1] > nodeupp[1]) return false;
-    if (lowVert[2] > nodeupp[2]) return false;
-    if (uppVert[0] < nodelow[0]) return false;
-    if (uppVert[1] < nodelow[1]) return false;
-    if (uppVert[2] < nodelow[2]) return false;
-    return true;
-}
-
 bool cTri::isInNode(cOctNode &node)
 {
     if (lowVert[0] > node.upp[0]) return false;
@@ -142,6 +128,68 @@ bool cTri::isInNode(cOctNode &node)
     if (uppVert[1] < node.low[1]) return false;
     if (uppVert[2] < node.low[2]) return false;
     return true;
+}
+
+/*
+bool cTri::isPointInTri(vector<double> &q)
+{
+    double tol = 1.0e-06;
+    double abDen,alphaNum,alpha,betaNum,beta,gamma;
+    vector<double> ad,bd,qd;
+
+    // Find Barycentric coordinates of point (alpha, beta, gamma)
+    ad = vectSubtract(vertices[2],vertices[0]);
+    bd = vectSubtract(vertices[2],vertices[1]);
+    qd = vectSubtract(vertices[2],q);
+
+    abDen    = dotProduct(ad,ad)*dotProduct(bd,bd) - dotProduct(ad,bd)*dotProduct(ad,bd);
+    alphaNum = dotProduct(bd,bd)*dotProduct(ad,qd) - dotProduct(ad,bd)*dotProduct(bd,qd);
+    alpha    = alphaNum / abDen;
+    betaNum  = dotProduct(ad,ad)*dotProduct(bd,qd) - dotProduct(ad,bd)*dotProduct(ad,qd);
+    beta     = betaNum / abDen;
+    gamma    = 1.0 - alpha - beta;
+
+    // Use Barycentric coordinates to work out if point lies within the tri element
+    return ((alpha>=tol) and (beta>=tol) and (gamma>=tol));
+}
+*/
+
+bool cTri::isPointInTri(vector<double> &p)
+{
+    // Determines if point p is within a triangle by computing and
+    // testing the barycentric coordinates (u, v, w) of p
+
+    // Find Barycentric coordinates of point (u,v,w)
+    vector<double> v0 = vectSubtract(vertices[1],vertices[0]);
+    vector<double> v1 = vectSubtract(vertices[2],vertices[0]);
+    vector<double> v2 = vectSubtract(p,vertices[0]);
+    double d00 = dotProduct(v0, v0);
+    double d01 = dotProduct(v0, v1);
+    double d11 = dotProduct(v1, v1);
+    double d20 = dotProduct(v2, v0);
+    double d21 = dotProduct(v2, v1);
+    double denom = d00 * d11 - d01 * d01;
+    double v = (d11 * d20 - d01 * d21) / denom;
+    double w = (d00 * d21 - d01 * d20) / denom;
+    double u = 1.0 - v - w;
+
+    // Use Barycentric coordinates to work out if point lies within the tri element
+    double tol = 1.0e-06;	
+    return ((v>=tol) and (w>=tol) and (u>=tol));
+}
+
+vector<double> cTri::rayPlaneIntersectPoint(cLine &ray)
+{
+    double tol  = 1.0e-06;
+    double sDen = dotProduct(ray.dir,N);
+	vector<double> p;
+    if (fabs(sDen)> tol) // Normals cannot be perpendicular such that dot product equals 0
+	{
+        double sNum = D - dotProduct(ray.p0,N);
+        double s = sNum / sDen;
+        p = vectAdd(ray.p0,ray.dir,s);
+    }
+	return p;
 }
 
 // ------------------------------------------------------
@@ -355,14 +403,14 @@ void cOctree::findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode
 {
     // Recursive function used by getNodesFromLabel
     if (node.isLeafNode()) {
-	    vector<int>::iterator it;
-	    it = find(node.data.begin(),node.data.end(),polyLabel);
-		if (it != node.data.end()) { nodeList.push_back(&node); }
-	} else {
-	    for (unsigned int i=0; i<node.branches.size(); i++) {
-		    findBranchesByLabel(polyLabel, node.branches[i], nodeList);
-		}
-	}
+        vector<int>::iterator it;
+        it = find(node.data.begin(),node.data.end(),polyLabel);
+        if (it != node.data.end()) { nodeList.push_back(&node); }
+    } else {
+        for (unsigned int i=0; i<node.branches.size(); i++) {
+            findBranchesByLabel(polyLabel, node.branches[i], nodeList);
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -376,17 +424,17 @@ cOctNode* cOctree::getNodeFromLabel(int polyLabel)
 cOctNode* cOctree::findBranchByLabel(int polyLabel, cOctNode &node)
 {
     if (node.isLeafNode()) {
-	    vector<int>::iterator it;
-	    it = find(node.data.begin(),node.data.end(),polyLabel);
-		if (it != node.data.end()) { 
-		    return &node; }
-	} else {
-	    for (unsigned int i=0; i<node.branches.size(); i++) {
-		    cOctNode *branch = findBranchByLabel(polyLabel, node.branches[i]);
-			if (branch != NULL) { return branch; }
-		}
-	}
-	return NULL;
+        vector<int>::iterator it;
+        it = find(node.data.begin(),node.data.end(),polyLabel);
+        if (it != node.data.end()) { 
+            return &node; }
+    } else {
+        for (unsigned int i=0; i<node.branches.size(); i++) {
+            cOctNode *branch = findBranchByLabel(polyLabel, node.branches[i]);
+            if (branch != NULL) { return branch; }
+        }
+    }
+    return NULL;
 }
 */
 
@@ -401,11 +449,11 @@ cOctNode* cOctree::findBranchById(string nodeId, cOctNode &node)
         return &node;
     } else {
         for (unsigned int i=0; i<node.branches.size(); i++) {
-		    cOctNode *branch = findBranchById(nodeId, node.branches[i]);
-			if (branch != NULL) { return branch; }
+            cOctNode *branch = findBranchById(nodeId, node.branches[i]);
+            if (branch != NULL) { return branch; }
         }
     }
-	return NULL;
+    return NULL;
 }
 
 cOctree::~cOctree() 

@@ -33,6 +33,16 @@ public:
     void setupConstants();
 };
 
+class cLine {
+public:
+    vector<double> p0,p1,dir;
+    cLine();
+    cLine(vector<double> &lp0, vector<double> &p1_dir, int isp1orDir);
+    ~cLine();
+    void getDir();
+    void getP1();
+};
+
 class cTri {
 public:
 
@@ -44,10 +54,11 @@ public:
     cTri();
     cTri(int _label, vector<vector<double> > _vertices);
     ~cTri();
+    bool isInNode(cOctNode &node);
+    bool isPointInTri(vector<double> &p);
+	vector<double> rayPlaneIntersectPoint(cLine &ray);
     void getN();
     void getD();
-    bool isInNode(cOctNode &node);
-    bool isInNode(vector<vector<double> > &lowUppVerts);
     void getLowerVert();
     void getUpperVert();
 };
@@ -76,16 +87,6 @@ public:
     cOctNode* findBranchById(string nodeId, cOctNode &node);
     vector<cOctNode*> getNodesFromLabel(int polyLabel);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
-};
-
-class CLine {
-public:
-    vector<double> p0,p1,dir;
-    CLine();
-    CLine(vector<double> &lp0, vector<double> &p1_dir, int isp1orDir);
-    ~CLine();
-    void getDir();
-    void getP1();
 };
 
 // Function prototypes

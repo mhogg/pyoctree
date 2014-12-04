@@ -38,7 +38,6 @@ cdef extern from "cOctree.h":
         cTri(int label, vector[vector[double]] vertices)
         void getN()
         void getD()
-        bint isInNode(vector[vector[double]] &lowUpp)
         
     cdef cppclass cOctNode:
         double size
@@ -134,7 +133,15 @@ cdef class PyOctree:
         if node is NULL:
             return None
         else:
-            return PyOctnode_Init(node,self)            
+            return PyOctnode_Init(node,self)   
+
+    def rayIntersection(self):
+	    # Pass in an array ndim=2, with each entry containing 2 points.
+		# These points will be used to generate rays which will be 
+		# tested for intersections with the polygons in the tree.
+		# For example:
+		# points = np.array([[0,0,0],[1,0,0]])
+        pass         
     
     property numPolys:
         def __get__(self):
