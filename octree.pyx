@@ -1,7 +1,6 @@
 
 # cython: profile=True
 
-#import string as pystring
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -22,10 +21,10 @@ cdef extern from "math.h":
 
 cdef extern from "cOctree.h":
     
-    cdef cppclass CLine:
+    cdef cppclass cLine:
         vector[double] p0,p1,dir
-        CLine()
-        CLine(vector[double] p0,vector[double] p1_dir,int isP1orDir)
+        cLine()
+        cLine(vector[double] p0,vector[double] p1_dir,int isP1orDir)
         void getDir()
         void getP1()
             
@@ -53,10 +52,11 @@ cdef extern from "cOctree.h":
         cOctree(vector[vector[double]] vertexCoords3D, vector[vector[int]] polyConnectivity)
         int numPolys()
         cOctNode root
-        vector[cTri] polyList
-        cOctNode* getNodeFromLabel(int polyLabel)
+        bint findRayIntersect(cLine ray)
         cOctNode* getNodeFromId(string nodeId)
+        vector[cTri] polyList		
         vector[cOctNode*] getNodesFromLabel(int polyLabel)
+        vector[bint] findRayIntersects(vector[cLine] rayList)
     
     #cdef double dotProduct( vector[double] v1, vector[double] v2 )
     #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
@@ -107,13 +107,6 @@ cdef class PyOctree:
         for i in range(self.thisptr.polyList.size()):
             tri = &self.thisptr.polyList[i]
             self.polyList.append(PyTri_Init(tri))
-        
-    #def getNodeFromLabel(self,int label):
-    #    cdef cOctNode *node = self.thisptr.getNodeFromLabel(label)
-    #    if node is NULL:
-    #        return None
-    #    else:
-    #        return PyOctnode_Init(node,self)
             
     def getNodesFromLabel(self,int label):
         cdef cOctNode *node = NULL
@@ -135,13 +128,42 @@ cdef class PyOctree:
         else:
             return PyOctnode_Init(node,self)   
 
-    def rayIntersection(self):
-	    # Pass in an array ndim=2, with each entry containing 2 points.
-		# These points will be used to generate rays which will be 
-		# tested for intersections with the polygons in the tree.
-		# For example:
-		# points = np.array([[0,0,0],[1,0,0]])
-        pass         
+    def rayIntersection(self,np.ndarray[float,ndim=2] _rayPoints):
+        """
+        Input:  Array of (1,2) points representing a single ray
+        Output: Bool indicating if intersection was found or not
+        """	
+        cdef int i
+        cdef vector[double] p0, p1
+        p0.resize(3)
+        p1.resize(3)
+        for i in range(3):
+            p0[i] = _rayPoints[0][i]
+            p1[i] = _rayPoints[1][i]
+        cdef cLine ray = cLine(p0,p1,0)
+        cdef bint foundInt = self.thisptr.findRayIntersect(ray)
+        return foundInt
+
+    def rayIntersections(self,np.ndarray[float,ndim=3] _rayList):
+        """
+        Input:  Array of (n,2,3) points representing rays
+        Output: Array of bool indicating if intersection was found or not
+        """
+        cdef int i,j
+        cdef vector[double] p0, p1
+        cdef vector[cLine] rayList
+        p0.resize(3)
+        p1.resize(3)
+        for i in range(_rayList.shape[0]):
+            for j in range(3):
+                p0[j] = _rayList[i][0][j]
+                p1[j] = _rayList[i][1][j]
+            rayList.push_back(cLine(p0,p1,0))
+        cdef vector[bint] ints = self.thisptr.findRayIntersects(rayList)
+        cdef np.ndarray[bint,ndim=1] foundInts = np.zeros(_rayList.shape[0])
+        for i in range(_rayList.shape[0]):
+            foundInts[i] = ints[i]
+        return foundInts
     
     property numPolys:
         def __get__(self):
@@ -233,7 +255,7 @@ cdef class PyOctnode:
 
     def __dealloc__(self):
         # No need to dealloc - cOctNodes are managed by cOctree
-        pass          
+        pass
 
 
 cdef class PyTri:

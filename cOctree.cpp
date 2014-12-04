@@ -10,11 +10,11 @@ cLine::cLine()
     p1[0]=1.0; dir[0]=1.0;
 }
 
-cLine::cLine(vector<double> &lp0, vector<double> &p1_dir, int isP1orDir)
+cLine::cLine(vector<double> &_p0, vector<double> &p1_dir, int isP1orDir)
 {
     // if isP1orDir==0, then p1_dir is p1
     // if isP1orDir==1, then p1_dir is dir
-    p0 = lp0;
+    p0 = _p0;
     if (isP1orDir==0) {
         p1 = p1_dir;
         getDir(); }
@@ -182,14 +182,14 @@ vector<double> cTri::rayPlaneIntersectPoint(cLine &ray)
 {
     double tol  = 1.0e-06;
     double sDen = dotProduct(ray.dir,N);
-	vector<double> p;
+    vector<double> p;
     if (fabs(sDen)> tol) // Normals cannot be perpendicular such that dot product equals 0
-	{
+    {
         double sNum = D - dotProduct(ray.p0,N);
         double s = sNum / sDen;
         p = vectAdd(ray.p0,ray.dir,s);
     }
-	return p;
+    return p;
 }
 
 // ------------------------------------------------------
@@ -389,8 +389,6 @@ void cOctree::splitNodeAndReallocate(cOctNode &node)
     node.data.resize(0);
 }
 
-// ----------------------------------------------------------------------------
-
 vector<cOctNode*> cOctree::getNodesFromLabel(int polyLabel)
 {
     // Function for finding all the nodes that contains tri with given label 
@@ -413,31 +411,6 @@ void cOctree::findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode
     }
 }
 
-// ----------------------------------------------------------------------------
-
-/*
-cOctNode* cOctree::getNodeFromLabel(int polyLabel)
-{
-    return findBranchByLabel(polyLabel,root);
-}
-
-cOctNode* cOctree::findBranchByLabel(int polyLabel, cOctNode &node)
-{
-    if (node.isLeafNode()) {
-        vector<int>::iterator it;
-        it = find(node.data.begin(),node.data.end(),polyLabel);
-        if (it != node.data.end()) { 
-            return &node; }
-    } else {
-        for (unsigned int i=0; i<node.branches.size(); i++) {
-            cOctNode *branch = findBranchByLabel(polyLabel, node.branches[i]);
-            if (branch != NULL) { return branch; }
-        }
-    }
-    return NULL;
-}
-*/
-
 cOctNode* cOctree::getNodeFromId(string nodeId)
 {
     return findBranchById(nodeId,root);
@@ -459,6 +432,19 @@ cOctNode* cOctree::findBranchById(string nodeId, cOctNode &node)
 cOctree::~cOctree() 
 {
     //cout << "Destroying the cOctree" << endl;
+}
+
+int cOctree::findRayIntersect(cLine &ray)
+{
+    int foundInt = 0;
+    return foundInt;
+}
+
+vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
+{
+    vector<int> foundInts;
+    foundInts.push_back(0);
+    return foundInts;
 }
 
 // ------------------------------------------------------

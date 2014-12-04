@@ -35,6 +35,7 @@ public:
 
 class cLine {
 public:
+
     vector<double> p0,p1,dir;
     cLine();
     cLine(vector<double> &lp0, vector<double> &p1_dir, int isp1orDir);
@@ -56,7 +57,7 @@ public:
     ~cTri();
     bool isInNode(cOctNode &node);
     bool isPointInTri(vector<double> &p);
-	vector<double> rayPlaneIntersectPoint(cLine &ray);
+    vector<double> rayPlaneIntersectPoint(cLine &ray);
     void getN();
     void getD();
     void getLowerVert();
@@ -76,16 +77,16 @@ public:
     ~cOctree();    
     double getSizeRoot();
     int numPolys();
-    vector<double> getPositionRoot();
+    int findRayIntersect(cLine &ray);
+    cOctNode* getNodeFromId(string nodeId);
+    cOctNode* findBranchById(string nodeId, cOctNode &node);
+    vector<double> getPositionRoot();	
+    vector<int> findRayIntersects(vector<cLine> &rayList);		
+    vector<cOctNode*> getNodesFromLabel(int polyLabel);	
     void insertPoly(cOctNode &node, cTri &poly);
     void insertPolys();
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
-    //cOctNode* getNodeFromLabel(int polyLabel);
-    //cOctNode* findBranchByLabel(int polyLabel, cOctNode &node);
-    cOctNode* getNodeFromId(string nodeId);
-    cOctNode* findBranchById(string nodeId, cOctNode &node);
-    vector<cOctNode*> getNodesFromLabel(int polyLabel);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
 };
 
