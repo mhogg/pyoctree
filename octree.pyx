@@ -206,7 +206,7 @@ cdef class PyOctree:
                 p1[j] = _rayList[i][1][j]
             rayList.push_back(cLine(p0,p1,0))
         cdef vector[bint] ints = self.thisptr.findRayIntersects(rayList)
-        cdef np.ndarray[int,ndim=1] foundInts = np.zeros(_rayList.shape[0],dtype=int)
+        cdef np.ndarray[int32,ndim=1] foundInts = np.zeros(_rayList.shape[0],dtype=np.int32)
         for i in range(_rayList.shape[0]):
             foundInts[i] = ints[i]
         return foundInts
