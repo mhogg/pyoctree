@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -9,6 +10,17 @@
 #include <algorithm> // find
 
 using namespace std;
+
+class cLine {
+public:
+
+    vector<double> p0,p1,dir;
+    cLine();
+    cLine(vector<double> &lp0, vector<double> &p1_dir, int isp1orDir);
+    ~cLine();
+    void getDir();
+    void getP1();
+};
 
 class cOctNode {
 public:
@@ -31,17 +43,7 @@ public:
     void addNode(int _level, string _nid, vector<double> _position, double _size);
     void getLowUppVerts();
     void setupConstants();
-};
-
-class cLine {
-public:
-
-    vector<double> p0,p1,dir;
-    cLine();
-    cLine(vector<double> &lp0, vector<double> &p1_dir, int isp1orDir);
-    ~cLine();
-    void getDir();
-    void getP1();
+    bool sphereRayIntersect(cLine &ray);
 };
 
 class cTri {
@@ -88,6 +90,8 @@ public:
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
+    set<int> getListPolysToCheck(cLine &ray);
+    void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
 };
 
 // Function prototypes

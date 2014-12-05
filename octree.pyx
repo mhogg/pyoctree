@@ -4,6 +4,7 @@
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
+from libcpp.set cimport set
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref, preincrement as inc, predecrement as dec
 ctypedef np.float64_t float64
@@ -56,7 +57,8 @@ cdef extern from "cOctree.h":
         cOctNode* getNodeFromId(string nodeId)
         vector[cTri] polyList		
         vector[cOctNode*] getNodesFromLabel(int polyLabel)
-        vector[bint] findRayIntersects(vector[cLine] rayList)
+        vector[bint] findRayIntersects(vector[cLine] &rayList)
+        set[int] getListPolysToCheck(cLine &ray);
     
     #cdef double dotProduct( vector[double] v1, vector[double] v2 )
     #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
@@ -128,6 +130,25 @@ cdef class PyOctree:
         else:
             return PyOctnode_Init(node,self)   
 
+    def getListOfPolysToCheck(self,np.ndarray[float,ndim=2] _rayPoints):
+        cdef int i
+        cdef vector[double] p0, p1
+        p0.resize(3)
+        p1.resize(3)
+        for i in range(3):
+            p0[i] = _rayPoints[0][i]
+            p1[i] = _rayPoints[1][i]
+        cdef cLine ray = cLine(p0,p1,0)
+        cdef set[int] polySetToCheck = self.thisptr.getListPolysToCheck(ray)
+        cdef int numPolys = polySetToCheck.size()
+        cdef set[int].iterator it
+        it = polySetToCheck.begin()
+        s  = str(deref(it)); inc(it)
+        while it!=polySetToCheck.end():
+            s += ", " + str(deref(it))
+            inc(it)
+        return s
+        
     def rayIntersection(self,np.ndarray[float,ndim=2] _rayPoints):
         """
         Input:  Array of (1,2) points representing a single ray

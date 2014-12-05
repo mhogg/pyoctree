@@ -223,7 +223,7 @@ cOctNode::~cOctNode() {
 void cOctNode::setupConstants() 
 {
     NUM_BRANCHES_OCTNODE = 8; 
-    MAX_OCTNODE_OBJECTS  = 500;   
+    MAX_OCTNODE_OBJECTS  = 250;   
 }
 
 bool cOctNode::isLeafNode() { return branches.size()==0; }
@@ -246,6 +246,25 @@ int cOctNode::numPolys() { return data.size(); }
 void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
 {
     branches.push_back(cOctNode(_level,_nid,_position,_size));
+}
+
+bool cOctNode::sphereRayIntersect(cLine &ray)
+{
+    // Quick test for determining if a ray is *likely* to intersect a given node
+
+    // Radius of sphere that contains node
+    double radius = distBetweenPoints(low,position);
+    
+    // Project centre of sphere (node.position) onto ray
+    vector<double> oc = vectSubtract(position, ray.p0);
+    double s = dotProduct(oc,ray.dir);
+    vector<double> projpnt = vectAdd(ray.p0, ray.dir, s);
+    double dist = distBetweenPoints(projpnt,position);
+    
+    // If distance between spherical centre and projected point is 
+    // less than the radius of the sphere, then an intersection is
+    // *possible*
+    return (dist<=radius);
 }
 
 // ------------------------------------------------------
@@ -434,14 +453,40 @@ cOctree::~cOctree()
     //cout << "Destroying the cOctree" << endl;
 }
 
+set<int> cOctree::getListPolysToCheck(cLine &ray)
+{
+    // Returns a list of all polygons that are within OctNodes hit by a given ray
+    set<int> intTestPolys;
+    getPolysToCheck(root,ray,intTestPolys);
+    return intTestPolys;
+}
+
+void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys)
+{
+    // Utility function for getListPolysToCheck. Finds all OctNodes hit by a given ray
+    // and returns a list of the objects contained within
+    if (node.sphereRayIntersect(ray)) {
+        if (node.isLeafNode()) {
+            for (int i=0; i<node.numPolys(); i++) {
+                intTestPolys.insert(node.data[i]); }
+        } else {
+            for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+                getPolysToCheck(node.branches[i],ray,intTestPolys);
+            } 
+        }
+    }
+}
+
 int cOctree::findRayIntersect(cLine &ray)
 {
+    // Still need to code this function
     int foundInt = 0;
     return foundInt;
 }
 
 vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
+    // Still need to code this function
     vector<int> foundInts;
     foundInts.push_back(0);
     return foundInts;
