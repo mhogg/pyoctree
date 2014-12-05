@@ -11,6 +11,17 @@
 
 using namespace std;
 
+typedef struct intersection
+{
+    double s;
+    vector<double> p;
+    intersection() { p.resize(3,0.0); s=0.0; }
+    intersection(vector<double> _p, double _s) { p=_p; s=_s;}
+    // Overload operator < so we can use sort function of a std::vector
+    bool operator < (const intersection& intersect) const { 
+        return (s < intersect.s); }
+} Intersection;
+
 class cLine {
 public:
 
@@ -59,7 +70,8 @@ public:
     ~cTri();
     bool isInNode(cOctNode &node);
     bool isPointInTri(vector<double> &p);
-    vector<double> rayPlaneIntersectPoint(cLine &ray);
+    bool rayPlaneIntersectPoint(cLine &ray);
+    bool rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s);
     void getN();
     void getD();
     void getLowerVert();
@@ -79,7 +91,7 @@ public:
     ~cOctree();    
     double getSizeRoot();
     int numPolys();
-    int findRayIntersect(cLine &ray);
+    vector<Intersection> findRayIntersect(cLine &ray);
     cOctNode* getNodeFromId(string nodeId);
     cOctNode* findBranchById(string nodeId, cOctNode &node);
     vector<double> getPositionRoot();	

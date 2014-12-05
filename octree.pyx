@@ -21,6 +21,10 @@ cdef extern from "math.h":
  
 
 cdef extern from "cOctree.h":
+
+    cdef cppclass Intersection:
+        double s
+        vector[double] p
     
     cdef cppclass cLine:
         vector[double] p0,p1,dir
@@ -53,7 +57,7 @@ cdef extern from "cOctree.h":
         cOctree(vector[vector[double]] vertexCoords3D, vector[vector[int]] polyConnectivity)
         int numPolys()
         cOctNode root
-        bint findRayIntersect(cLine ray)
+        vector[Intersection] findRayIntersect(cLine ray)
         cOctNode* getNodeFromId(string nodeId)
         vector[cTri] polyList		
         vector[cOctNode*] getNodesFromLabel(int polyLabel)
@@ -66,8 +70,8 @@ cdef extern from "cOctree.h":
     #cdef vector[double] vectAdd( vector[double] a, vector[double] b )
     #cdef vector[double] vectAdd( vector[double] a, vector[double] b, double sf )
     #cdef double distBetweenPoints( vector[double] a, vector[double] b )   
-        
-                    
+    
+    
 cdef class PyOctree:
 
     cdef cOctree *thisptr
@@ -110,7 +114,15 @@ cdef class PyOctree:
             tri = &self.thisptr.polyList[i]
             self.polyList.append(PyTri_Init(tri))
             
+    def __dealloc__(self):
+        #print "Deallocating octree"
+        del self.thisptr
+        
     def getNodesFromLabel(self,int label):
+        '''
+        Returns a list of PyOctnodes that the polygon with the given label
+        is contained within 
+        '''
         cdef cOctNode *node = NULL
         cdef vector[cOctNode*] nodes = self.thisptr.getNodesFromLabel(label)
         cdef int i
@@ -124,6 +136,10 @@ cdef class PyOctree:
             return nodeList         
             
     def getNodeFromId(self,string nodeId):
+        '''
+        Returns a PyOctnode given the node string id i.e. '0' for root and 
+        '0-0' for first branch
+        '''
         cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId)
         if node is NULL:
             return None
@@ -131,6 +147,9 @@ cdef class PyOctree:
             return PyOctnode_Init(node,self)   
 
     def getListOfPolysToCheck(self,np.ndarray[float,ndim=2] _rayPoints):
+        '''
+        Returns a list of polygons that should be tested for intersections
+        '''
         cdef int i
         cdef vector[double] p0, p1
         p0.resize(3)
@@ -150,10 +169,10 @@ cdef class PyOctree:
         return s
         
     def rayIntersection(self,np.ndarray[float,ndim=2] _rayPoints):
-        """
+        '''
         Input:  Array of (1,2) points representing a single ray
-        Output: Bool indicating if intersection was found or not
-        """	
+        Output: List of type Intersect, or empty list if no intersections found
+        '''	
         cdef int i
         cdef vector[double] p0, p1
         p0.resize(3)
@@ -162,14 +181,20 @@ cdef class PyOctree:
             p0[i] = _rayPoints[0][i]
             p1[i] = _rayPoints[1][i]
         cdef cLine ray = cLine(p0,p1,0)
-        cdef bint foundInt = self.thisptr.findRayIntersect(ray)
-        return foundInt
+        cdef vector[Intersection] intersectList = self.thisptr.findRayIntersect(ray)
+        numInts = intersectList.size()
+        intList = []
+        for i in range(numInts):
+            intsect = Intersect()
+            intsect.SetValues(intersectList[i].p,intersectList[i].s)
+            intList.append(intsect)
+        return intList
 
     def rayIntersections(self,np.ndarray[float,ndim=3] _rayList):
-        """
+        '''
         Input:  Array of (n,2,3) points representing rays
         Output: Array of bool indicating if intersection was found or not
-        """
+        '''
         cdef int i,j
         cdef vector[double] p0, p1
         cdef vector[cLine] rayList
@@ -181,7 +206,7 @@ cdef class PyOctree:
                 p1[j] = _rayList[i][1][j]
             rayList.push_back(cLine(p0,p1,0))
         cdef vector[bint] ints = self.thisptr.findRayIntersects(rayList)
-        cdef np.ndarray[bint,ndim=1] foundInts = np.zeros(_rayList.shape[0])
+        cdef np.ndarray[int,ndim=1] foundInts = np.zeros(_rayList.shape[0],dtype=int)
         for i in range(_rayList.shape[0]):
             foundInts[i] = ints[i]
         return foundInts
@@ -189,11 +214,20 @@ cdef class PyOctree:
     property numPolys:
         def __get__(self):
             return self.thisptr.numPolys()
-                
-    def __dealloc__(self):
-        print "Deallocating octree"
-        del self.thisptr            
-
+        
+        
+cdef class Intersect:
+    cdef public double s
+    cdef public np.ndarray p
+    def __init__(self):
+        self.s = 0.0
+        self.p = np.zeros(3,dtype=float)     
+    cdef SetValues(self,vector[double] p, double s):
+        cdef int i
+        for i in range(3):
+            self.p[i] = p[i]
+        self.s = s
+        
               
 cdef class PyOctnode:
     

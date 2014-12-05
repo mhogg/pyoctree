@@ -130,30 +130,6 @@ bool cTri::isInNode(cOctNode &node)
     return true;
 }
 
-/*
-bool cTri::isPointInTri(vector<double> &q)
-{
-    double tol = 1.0e-06;
-    double abDen,alphaNum,alpha,betaNum,beta,gamma;
-    vector<double> ad,bd,qd;
-
-    // Find Barycentric coordinates of point (alpha, beta, gamma)
-    ad = vectSubtract(vertices[2],vertices[0]);
-    bd = vectSubtract(vertices[2],vertices[1]);
-    qd = vectSubtract(vertices[2],q);
-
-    abDen    = dotProduct(ad,ad)*dotProduct(bd,bd) - dotProduct(ad,bd)*dotProduct(ad,bd);
-    alphaNum = dotProduct(bd,bd)*dotProduct(ad,qd) - dotProduct(ad,bd)*dotProduct(bd,qd);
-    alpha    = alphaNum / abDen;
-    betaNum  = dotProduct(ad,ad)*dotProduct(bd,qd) - dotProduct(ad,bd)*dotProduct(ad,qd);
-    beta     = betaNum / abDen;
-    gamma    = 1.0 - alpha - beta;
-
-    // Use Barycentric coordinates to work out if point lies within the tri element
-    return ((alpha>=tol) and (beta>=tol) and (gamma>=tol));
-}
-*/
-
 bool cTri::isPointInTri(vector<double> &p)
 {
     // Determines if point p is within a triangle by computing and
@@ -175,21 +151,35 @@ bool cTri::isPointInTri(vector<double> &p)
 
     // Use Barycentric coordinates to work out if point lies within the tri element
     double tol = 1.0e-06;	
-    return ((v>=tol) and (w>=tol) and (u>=tol));
+    return ((v>=tol) && (w>=tol) && (u>=tol));
 }
 
-vector<double> cTri::rayPlaneIntersectPoint(cLine &ray)
+bool cTri::rayPlaneIntersectPoint(cLine &ray)
 {
     double tol  = 1.0e-06;
     double sDen = dotProduct(ray.dir,N);
-    vector<double> p;
     if (fabs(sDen)> tol) // Normals cannot be perpendicular such that dot product equals 0
     {
         double sNum = D - dotProduct(ray.p0,N);
         double s = sNum / sDen;
+        vector<double> p = vectAdd(ray.p0,ray.dir,s);
+        return isPointInTri(p);
+    } 
+    return false;
+}
+
+bool cTri::rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s)
+{
+    double tol  = 1.0e-06;
+    double sDen = dotProduct(ray.dir,N);
+    if (fabs(sDen)> tol) // Normals cannot be perpendicular such that dot product equals 0
+    {
+        double sNum = D - dotProduct(ray.p0,N);
+        s = sNum / sDen;
         p = vectAdd(ray.p0,ray.dir,s);
-    }
-    return p;
+        return isPointInTri(p);
+    } 
+    return false;
 }
 
 // ------------------------------------------------------
@@ -477,19 +467,43 @@ void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys
     }
 }
 
-int cOctree::findRayIntersect(cLine &ray)
-{
-    // Still need to code this function
-    int foundInt = 0;
-    return foundInt;
+vector<Intersection> cOctree::findRayIntersect(cLine &ray)
+{   
+    // Get polys to check
+    set<int> polyListCheck = getListPolysToCheck(ray);
+    
+    // Loop through all polys in check list to find a possible intersection
+    vector<Intersection> intersectList;
+    set<int>::iterator it;
+    vector<double> ip;
+    double s;
+    for (it=polyListCheck.begin(); it!=polyListCheck.end(); ++it) {
+        int polyLabel = *it;
+        if (polyList[polyLabel].rayPlaneIntersectPoint(ray,ip,s)) {
+            intersectList.push_back(Intersection(ip,s)); } 
+    }
+    
+    // Sort list in terms of distance of the intersection from the ray origin
+    sort(intersectList.begin(),intersectList.end());
+    
+    return intersectList;
 }
 
 vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
-    // Still need to code this function
-    vector<int> foundInts;
-    foundInts.push_back(0);
-    return foundInts;
+    int numRays = rayList.size();
+    vector<int> foundIntsects(numRays,0);
+    for (int i=0; i<numRays; i++) 
+    {
+        cLine *ray = &rayList[i]; 
+        set<int> polyListCheck = getListPolysToCheck(*ray);
+        for (set<int>::iterator it=polyListCheck.begin(); it!=polyListCheck.end(); ++it) {
+            int polyLabel = *it;
+            if (polyList[polyLabel].rayPlaneIntersectPoint(*ray)) {
+                foundIntsects[i] = 1; break; } 
+        }
+    }
+    return foundIntsects;
 }
 
 // ------------------------------------------------------
