@@ -34,6 +34,7 @@ for i in xrange(numPolys):
 # Create octree structure for stl poly mesh
 tree = octree.PyOctree(pointCoords,connectivity)
 
+"""
 # Visualise octree using Paraview
 def getOctreeRep(octnode):
     global connect, numVerts, pc
@@ -81,6 +82,7 @@ writer.SetFileName('octree.vtu')
 writer.SetInput(uGrid)
 writer.SetDataModeToAscii()
 writer.Write()
+"""
 
 # Perform shadowing
 from skimage import filter

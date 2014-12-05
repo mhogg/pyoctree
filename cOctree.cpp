@@ -150,15 +150,17 @@ bool cTri::isPointInTri(vector<double> &p)
     double u = 1.0 - v - w;
 
     // Use Barycentric coordinates to work out if point lies within the tri element
-    double tol = 1.0e-06;	
+    double tol = 0.0;	
     return ((v>=tol) && (w>=tol) && (u>=tol));
 }
 
-bool cTri::rayPlaneIntersectPoint(cLine &ray)
+bool cTri::rayPlaneIntersectPoint(cLine &ray, bool entryOnly=false)
 {
+    // NOTE: Provide option to just check for entry intersections, not both entries/exits
+    //       This should cut down checking by roughly half
     double tol  = 1.0e-06;
     double sDen = dotProduct(ray.dir,N);
-    if (fabs(sDen)> tol) // Normals cannot be perpendicular such that dot product equals 0
+    if ((entryOnly && sDen>tol) || (!entryOnly && fabs(sDen)>tol))
     {
         double sNum = D - dotProduct(ray.p0,N);
         double s = sNum / sDen;
@@ -186,7 +188,6 @@ bool cTri::rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s)
 
 cOctNode::cOctNode()
 {  
-    setupConstants();
     level = 0;
     nid   = "";
     size  = 1.0;
@@ -197,7 +198,6 @@ cOctNode::cOctNode()
 
 cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
 {
-    setupConstants();
     level    = _level;
     nid      = _nid;
     position = _position;
@@ -208,12 +208,6 @@ cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _si
 
 cOctNode::~cOctNode() {
     //cout << "Calling destructor for cOctnode " << nid << endl;
-}
-
-void cOctNode::setupConstants() 
-{
-    NUM_BRANCHES_OCTNODE = 8; 
-    MAX_OCTNODE_OBJECTS  = 100;   
 }
 
 bool cOctNode::isLeafNode() { return branches.size()==0; }
@@ -231,7 +225,7 @@ void cOctNode::getLowUppVerts()
 
 void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
 
-int cOctNode::numPolys() { return data.size(); }
+int cOctNode::numPolys() { return (int)(data.size()); }
 
 void cOctNode::addNode(int _level, string _nid, vector<double> _position, double _size)
 {
@@ -262,7 +256,6 @@ bool cOctNode::sphereRayIntersect(cLine &ray)
 
 cOctree::cOctree(vector<vector<double> > _vertexCoords3D, vector<vector<int> > _polyConnectivity)
 {
-    MAX_OCTREE_LEVELS = 10;
     vertexCoords3D    = _vertexCoords3D;
     polyConnectivity  = _polyConnectivity;
     int _offsets[][3] = {{-1,-1,-1},{+1,-1,-1},{-1,+1,-1},{+1,+1,-1},
@@ -295,7 +288,7 @@ void cOctree::setupPolyList()
     }
 }
 
-int cOctree::numPolys() { return polyList.size(); }
+int cOctree::numPolys() { return (int)(polyList.size()); }
 
 void cOctree::insertPoly(cOctNode &node, cTri &poly)
 {
@@ -491,7 +484,7 @@ vector<Intersection> cOctree::findRayIntersect(cLine &ray)
 
 vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
-    int numRays = rayList.size();
+    int numRays = (int)(rayList.size());
     vector<int> foundIntsects(numRays,0);
     #pragma omp parallel for
     for (int i=0; i<numRays; i++) 

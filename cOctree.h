@@ -41,9 +41,9 @@ public:
 class cOctNode {
 public:
 
+    static const int MAX_OCTNODE_OBJECTS  = 200;
+    static const int NUM_BRANCHES_OCTNODE = 8;  
     double size;
-    int MAX_OCTNODE_OBJECTS;
-    int NUM_BRANCHES_OCTNODE;    
     int level;
     string nid;
     vector<double> position;
@@ -58,7 +58,6 @@ public:
     void addPoly(int _indx);
     void addNode(int _level, string _nid, vector<double> _position, double _size);
     void getLowUppVerts();
-    void setupConstants();
     bool sphereRayIntersect(cLine &ray);
 };
 
@@ -75,7 +74,7 @@ public:
     ~cTri();
     bool isInNode(cOctNode &node);
     bool isPointInTri(vector<double> &p);
-    bool rayPlaneIntersectPoint(cLine &ray);
+    bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
     bool rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s);
     void getN();
     void getD();
@@ -86,7 +85,7 @@ public:
 class cOctree {
 public:
 
-    int MAX_OCTREE_LEVELS;
+    static const int MAX_OCTREE_LEVELS = 10;
     int branchOffsets[8][3];
     cOctNode root;
     vector<vector<double> > vertexCoords3D;
