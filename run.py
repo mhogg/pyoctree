@@ -1,6 +1,7 @@
 
 import vtk
 import numpy as np
+import matplotlib.pyplot as plt
 import octree
 
 # Read in stl file
@@ -80,4 +81,18 @@ writer.SetFileName('octree.vtu')
 writer.SetInput(uGrid)
 writer.SetDataModeToAscii()
 writer.Write()
+
+# Perform shadowing
+width,height = 200,200
+xr = np.linspace(-0.0526,3.06,width)
+yr = np.linspace(5.77,8.88,height)
+rayPointList = []
+for x in xr:
+    for y in yr:
+        rayPointList.append([[x,y,6.0],[x,y,0.0]])
+rayPointList = np.array(rayPointList,dtype=np.float32)
+
+image = tree.rayIntersections(rayPointList)
+image = image.reshape((width,height))
+plt.imshow(image,cmap=plt.cm.gray)
 
