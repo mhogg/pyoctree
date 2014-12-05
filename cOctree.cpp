@@ -213,7 +213,7 @@ cOctNode::~cOctNode() {
 void cOctNode::setupConstants() 
 {
     NUM_BRANCHES_OCTNODE = 8; 
-    MAX_OCTNODE_OBJECTS  = 250;   
+    MAX_OCTNODE_OBJECTS  = 100;   
 }
 
 bool cOctNode::isLeafNode() { return branches.size()==0; }
