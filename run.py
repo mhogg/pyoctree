@@ -83,6 +83,7 @@ writer.SetDataModeToAscii()
 writer.Write()
 
 # Perform shadowing
+from skimage import filter
 width,height = 200,200
 xr = np.linspace(-0.0526,3.06,width)
 yr = np.linspace(5.77,8.88,height)
@@ -92,7 +93,19 @@ for x in xr:
         rayPointList.append([[x,y,6.0],[x,y,0.0]])
 rayPointList = np.array(rayPointList,dtype=np.float32)
 
-image = tree.rayIntersections(rayPointList)
-image = image.reshape((width,height))
-plt.imshow(image,cmap=plt.cm.gray)
+proj  = tree.rayIntersections(rayPointList)
+proj  = proj.reshape((width,height))
+proj  = proj.astype(float)
+proj  = proj[::-1,:]
+edges = filter.canny(proj,sigma=1.0)
+
+fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(10, 4));
+ax1.imshow(proj, cmap=plt.cm.gray)
+ax1.axis('off')
+ax1.set_title('Projected object', fontsize=16)
+ax2.imshow(edges, cmap=plt.cm.gray)
+ax2.axis('off')
+ax2.set_title('Edge detection (Canny filter)', fontsize=16);
+fig.subplots_adjust(wspace=0.1, hspace=0.02, top=0.95, bottom=0.02, left=0.02, right=0.98)
+plt.show()
 
