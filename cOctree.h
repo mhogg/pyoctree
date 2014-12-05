@@ -9,6 +9,11 @@
 #include <sstream>
 #include <algorithm> // find
 
+// OpenMP headers
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
+
 using namespace std;
 
 typedef struct intersection
@@ -91,10 +96,11 @@ public:
     ~cOctree();    
     double getSizeRoot();
     int numPolys();
-    vector<Intersection> findRayIntersect(cLine &ray);
     cOctNode* getNodeFromId(string nodeId);
     cOctNode* findBranchById(string nodeId, cOctNode &node);
+    set<int> getListPolysToCheck(cLine &ray);    
     vector<double> getPositionRoot();	
+    vector<Intersection> findRayIntersect(cLine &ray);    
     vector<int> findRayIntersects(vector<cLine> &rayList);		
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
     void insertPoly(cOctNode &node, cTri &poly);
@@ -102,7 +108,6 @@ public:
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
-    set<int> getListPolysToCheck(cLine &ray);
     void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
 };
 

@@ -493,6 +493,7 @@ vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
     int numRays = rayList.size();
     vector<int> foundIntsects(numRays,0);
+    #pragma omp parallel for
     for (int i=0; i<numRays; i++) 
     {
         cLine *ray = &rayList[i]; 
