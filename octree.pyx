@@ -52,6 +52,7 @@ cdef extern from "cOctree.h":
         vector[int] data        
         int numPolys()
         bint isLeafNode()
+        bint boxRayIntersect(cLine &ray)
         
     cdef cppclass cOctree:
         cOctree(vector[vector[double]] vertexCoords3D, vector[vector[int]] polyConnectivity)
@@ -62,7 +63,7 @@ cdef extern from "cOctree.h":
         vector[cTri] polyList		
         vector[cOctNode*] getNodesFromLabel(int polyLabel)
         vector[bint] findRayIntersects(vector[cLine] &rayList)
-        set[int] getListPolysToCheck(cLine &ray);
+        set[int] getListPolysToCheck(cLine &ray)
     
     #cdef double dotProduct( vector[double] v1, vector[double] v2 )
     #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
@@ -248,6 +249,18 @@ cdef class PyOctnode:
             if self.thisptr.data[i]==label: 
                 return True
         return False  
+        
+    def boxRayIntersect(self,np.ndarray[float,ndim=2] _rayPoints):
+        cdef int i
+        cdef vector[double] p0, p1
+        p0.resize(3)
+        p1.resize(3)
+        for i in range(3):
+            p0[i] = _rayPoints[0][i]
+            p1[i] = _rayPoints[1][i]
+        cdef cLine ray = cLine(p0,p1,0)
+        cdef bint result = self.thisptr.boxRayIntersect(ray)
+        return result
         
     property isLeaf:
         def __get__(self):

@@ -58,6 +58,7 @@ public:
     void addPoly(int _indx);
     void addNode(int _level, string _nid, vector<double> _position, double _size);
     void getLowUppVerts();
+    bool boxRayIntersect(cLine &ray);
     bool sphereRayIntersect(cLine &ray);
 };
 

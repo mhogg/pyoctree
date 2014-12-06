@@ -251,6 +251,54 @@ bool cOctNode::sphereRayIntersect(cLine &ray)
     return (dist<=radius);
 }
 
+bool cOctNode::boxRayIntersect(cLine &ray)
+{
+    // An accurate test for determining if a ray will intersect a given node.
+    // Tests for intersections between the ray and all 6 faces of the node.
+    
+    vector<double> p; double D, sDen, sNum, s, tol = 1.0e-06; int i, j;
+    
+    for (int faceId=1; faceId<=6; faceId++)
+    {
+        // Get D (distance of plane to origin) and N (face normal) of node face
+        vector<double> N(3,0.0);
+        switch(faceId) {
+            case 1: {
+                D = -low[0]; N[0] = -1.0; break; } // -x face
+            case 2: {
+                D = -low[1]; N[1] = -1.0; break; } // -y face
+            case 3: {
+                D = -low[2]; N[2] = -1.0; break; } // -z face
+            case 4: {
+                D =  upp[0]; N[0] =  1.0; break; } // +x face
+            case 5: {
+                D =  upp[1]; N[1] =  1.0; break; } // +y face
+            case 6: {
+                D =  upp[2]; N[2] =  1.0; }        // +z face    
+        }
+        
+        // Get intersection point between face plane and ray. If no intersection is 
+        // possible (i.e. the normal of the face is perp. to the line) then skip face
+        sDen = dotProduct(ray.dir,N);
+        if (fabs(sDen)>tol) {
+        
+            // Find intersection point p
+            sNum = D - dotProduct(ray.p0,N);
+            s    = sNum / sDen;
+            p    = vectAdd(ray.p0,ray.dir,s);
+            
+            // Check if intersection point is within bounds of face. If so, then 
+            // return true. If not, then skip face
+            if      (faceId==1 || faceId==4) { i=1; j=2; } // -x,+x
+            else if (faceId==2 || faceId==5) { i=0; j=2; } // -y,+y
+            else if (faceId==3 || faceId==6) { i=0; j=1; } // -z,+z
+            if ((p[i]>=low[i] && p[i]<=upp[i]) && (p[j]>=low[j] && p[j]<=upp[j])) {
+                return true; }
+        }
+    }
+    return false;
+}
+
 // ------------------------------------------------------
 
 
@@ -449,13 +497,15 @@ void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys
     // Utility function for getListPolysToCheck. Finds all OctNodes hit by a given ray
     // and returns a list of the objects contained within
     if (node.sphereRayIntersect(ray)) {
-        if (node.isLeafNode()) {
-            for (int i=0; i<node.numPolys(); i++) {
-                intTestPolys.insert(node.data[i]); }
-        } else {
-            for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
-                getPolysToCheck(node.branches[i],ray,intTestPolys);
-            } 
+        if (node.boxRayIntersect(ray)) {
+            if (node.isLeafNode()) {
+                for (int i=0; i<node.numPolys(); i++) {
+                    intTestPolys.insert(node.data[i]); }
+            } else {
+                for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+                    getPolysToCheck(node.branches[i],ray,intTestPolys);
+                } 
+            }
         }
     }
 }
