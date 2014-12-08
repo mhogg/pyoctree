@@ -9,15 +9,6 @@ from libcpp.string cimport string
 from cython.operator cimport dereference as deref, preincrement as inc, predecrement as dec
 ctypedef np.float64_t float64
 ctypedef np.int32_t int32
-
-
-cdef extern from "math.h":
-    float fabs(float val)
-    float acos(float val)
-    float asin(float val)
-    float atan(float val)
-    float fmin(float a, float b)
-    float fmax(float a, float b)
  
 
 cdef extern from "cOctree.h":
