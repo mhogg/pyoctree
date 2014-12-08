@@ -56,3 +56,4 @@ build/
 *.vtu
 octree.cpp
 Rectangle/
+.ipynb_checkpoints/
