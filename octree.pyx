@@ -38,7 +38,6 @@ cdef extern from "cOctree.h":
         vector[vector[double]] vertices
         vector[double] N
         double D
-        #cTri()
         cTri(int label, vector[vector[double]] vertices)
         void getN()
         void getD()
@@ -64,13 +63,7 @@ cdef extern from "cOctree.h":
         vector[cOctNode*] getNodesFromLabel(int polyLabel)
         vector[bint] findRayIntersects(vector[cLine] &rayList)
         set[int] getListPolysToCheck(cLine &ray)
-    
-    #cdef double dotProduct( vector[double] v1, vector[double] v2 )
-    #cdef vector[double] crossProduct(vector[double] v1, vector[double] v2)
-    #cdef vector[double] vectSubtract( vector[double] a, vector[double] b )
-    #cdef vector[double] vectAdd( vector[double] a, vector[double] b )
-    #cdef vector[double] vectAdd( vector[double] a, vector[double] b, double sf )
-    #cdef double distBetweenPoints( vector[double] a, vector[double] b )   
+        vector[cOctNode*] getSortedNodesToCheck(cLine &ray)
     
     
 cdef class PyOctree:
@@ -134,8 +127,28 @@ cdef class PyOctree:
         if len(nodeList)==1:
             return nodeList[0]
         else:
-            return nodeList         
+            return nodeList     
             
+    def getNodesFromRay(self,np.ndarray[float,ndim=2] _rayPoints):
+        cdef int i
+        cdef vector[double] p0, p1
+        p0.resize(3)
+        p1.resize(3)
+        for i in range(3):
+            p0[i] = _rayPoints[0][i]
+            p1[i] = _rayPoints[1][i]
+        cdef cLine ray = cLine(p0,p1,0)
+        cdef vector[cOctNode*] nodes = self.thisptr.getSortedNodesToCheck(ray)
+        cdef cOctNode *node = NULL
+        cdef list nodeList = []
+        for i in range(nodes.size()):
+            node = nodes[i]
+            nodeList.append(PyOctnode_Init(node,self))
+        if len(nodeList)==1:
+            return nodeList[0]
+        else:
+            return nodeList        
+                    
     def getNodeFromId(self,string nodeId):
         '''
         Returns a PyOctnode given the node string id i.e. '0' for root and 

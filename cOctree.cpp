@@ -510,6 +510,44 @@ void cOctree::getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys
     }
 }
 
+vector<cOctNode*> cOctree::getSortedNodesToCheck(cLine &ray)
+{
+    // Finds all the nodes that intersect with given ray. Uses the nodes "position"
+    // to sort the nodes by distance from the ray origin (in ascending order). 
+    // Nodes that are closest to the ray origin will be checked first for poly 
+    // intersections 
+    vector<pair<cOctNode*,double> > nodeList;
+    getNodesToCheck(root,ray,nodeList);
+    sort(nodeList.begin(),nodeList.end(),sortNodes);
+    vector<cOctNode*> nodeListSorted;
+    vector<pair<cOctNode*,double> >::iterator it;
+    for (it=nodeList.begin(); it!=nodeList.end(); it++) {
+        nodeListSorted.push_back((*it).first); }
+    return nodeListSorted;
+}
+
+void cOctree::getNodesToCheck(cOctNode &node, cLine &ray, vector<pair<cOctNode*,double> > &nodeList)
+{
+    // Utility function for getSortedNodesToCheck
+    // Finds all the nodes that intersect with given ray. Projects the node "position" (node
+    // centre) onto the ray to facilitate sorting of the nodes by distance from ray origin
+    if (node.sphereRayIntersect(ray)) {
+        if (node.boxRayIntersect(ray)) {
+            if (node.isLeafNode()) {
+                // Project node "position" on to ray and find distance from ray origin
+                vector<double> oc = vectSubtract(node.position, ray.p0);
+                double s = dotProduct(oc,ray.dir);
+                // Add node and distance to list
+                nodeList.push_back(std::make_pair(&node,s));
+            } else {
+                for (int i=0; i<node.NUM_BRANCHES_OCTNODE; i++) {
+                    getNodesToCheck(node.branches[i],ray,nodeList);
+                } 
+            }
+        }
+    }
+}
+
 vector<Intersection> cOctree::findRayIntersect(cLine &ray)
 {   
     // Get polys to check
@@ -532,8 +570,12 @@ vector<Intersection> cOctree::findRayIntersect(cLine &ray)
     return intersectList;
 }
 
+/*
 vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
+    // For each ray provided, determines if ray hits a poly in the tree and 
+    // returns a boolean integer. Uses openmp to speed up the calculation
+    
     int numRays = (int)(rayList.size());
     vector<int> foundIntsects(numRays,0);
     #pragma omp parallel for
@@ -546,6 +588,42 @@ vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
             if (polyList[polyLabel].rayPlaneIntersectPoint(*ray)) {
                 foundIntsects[i] = 1; break; } 
         }
+    }
+    return foundIntsects;
+}
+*/
+
+vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
+{
+    // For each ray provided, determines if ray hits a poly in the tree and 
+    // returns a boolean integer. 
+    // Uses "getSortedNodesToCheck", which returns a list of nodes that intersect
+    // with the given ray sorted in ascending order of distance from the ray origin
+    // Uses openmp to speed up the calculation
+    
+    int numRays = (int)(rayList.size());
+    vector<int> foundIntsects(numRays,0);
+    
+    #pragma omp parallel for
+    for (int i=0; i<numRays; i++) 
+    {
+        // Get branches to check. Branches are sorted in ascending distance 
+        // from ray origin
+        cLine *ray = &rayList[i]; 
+        vector<cOctNode*> nodeList = getSortedNodesToCheck(*ray);
+        
+        // Loop through sorted branches, checking the polys contained within each
+        vector<cOctNode*>::iterator it;
+        for (it=nodeList.begin(); it!=nodeList.end(); ++it) {
+            cOctNode *node = *it;
+            for (int j=0; j<node->data.size(); j++) {
+                int polyLabel = node->data[j];
+                if (polyList[polyLabel].rayPlaneIntersectPoint(*ray)) {
+                    foundIntsects[i]=1; break; } 
+            }
+            // If any poly from current node is hit, proceed on to the next node 
+            if (foundIntsects[i]==1) break;
+        } 
     }
     return foundIntsects;
 }
@@ -610,6 +688,14 @@ string NumberToString( int Number )
     ostringstream ss;
     ss << Number;
     return ss.str();
+}
+
+bool sortNodes(const pair<cOctNode*,double>&i, const pair<cOctNode*,double>&j)
+{
+    // Function used to sort a vector of cOctnode,double pairs by the value of
+    // the double. The double will typically represent distance from the ray
+    // origin in a ray-node intersection test
+    return i.second < j.second;
 }
 
 // ------------------------------------------------------

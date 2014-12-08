@@ -7,7 +7,8 @@
 #include <math.h>
 #include <string>
 #include <sstream>
-#include <algorithm> // find
+#include <algorithm> // find, sort
+#include <utility>   // pair
 
 // OpenMP headers
 #ifdef _OPENMP
@@ -26,6 +27,12 @@ typedef struct intersection
     bool operator < (const intersection& intersect) const { 
         return (s < intersect.s); }
 } Intersection;
+
+//struct cmp_by_first {
+//  template<typename T>
+//  bool operator < (const  T&x, const T& y) const { 
+//      return (x.first < y.first); }
+//};
 
 class cLine {
 public:
@@ -103,15 +110,18 @@ public:
     vector<Intersection> findRayIntersect(cLine &ray);    
     vector<int> findRayIntersects(vector<cLine> &rayList);		
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
+    vector<cOctNode*> getSortedNodesToCheck(cLine &ray);
     void insertPoly(cOctNode &node, cTri &poly);
     void insertPolys();
     void setupPolyList();
     void splitNodeAndReallocate(cOctNode &node);
     void findBranchesByLabel(int polyLabel, cOctNode &node, vector<cOctNode*> &nodeList);
     void getPolysToCheck(cOctNode &node, cLine &ray, set<int> &intTestPolys);
+    void getNodesToCheck(cOctNode &node, cLine &ray, vector<pair<cOctNode*,double> > &nodeList);
 };
 
 // Function prototypes
+bool sortNodes(const pair<cOctNode*,double>&i, const pair<cOctNode*,double>&j);
 double dotProduct( vector<double> &v1, vector<double> &v2 );
 double distBetweenPoints(vector<double> &p1, vector<double> &p2);
 string NumberToString( int Number );
@@ -119,4 +129,3 @@ vector<double> crossProduct( vector<double> &v1, vector<double> &v2 );
 vector<double> vectAdd( vector<double> &a, vector<double> &b);
 vector<double> vectAdd( vector<double> &a, vector<double> &b, double sf);
 vector<double> vectSubtract( vector<double> &a, vector<double> &b );
-
