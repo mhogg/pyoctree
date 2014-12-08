@@ -1,6 +1,7 @@
 
 # cython: profile=False
 
+import vtk
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -233,7 +234,84 @@ cdef class PyOctree:
         for i in range(_rayList.shape[0]):
             foundInts[i] = ints[i]
         return foundInts
-    
+        
+    cpdef int getNumberOfNodes(self):
+        '''
+        getNumberOfNodes()
+        
+        Returns the number of Octnodes in the Octree
+        '''
+        cdef int numNodes = 0
+        self.countNodes(self.root,numNodes)
+        return numNodes
+        
+    cdef void countNodes(self,PyOctnode node, int &numNodes):
+        '''
+        Utility function for getNumberOfNodes. Recursively counts number of Octnodes in Octree
+        '''
+        cdef PyOctnode branch
+        (&numNodes)[0] = (&numNodes)[0] + 1  # Syntax here is fix for Cython bug
+        if not node.isLeaf:
+            for branch in node.branches:
+                self.countNodes(branch,numNodes)
+                
+    def getOctreeRep(self,fileName='octree.vtu'):
+        '''
+        getOctreeRep(fileName='octree.vtu')
+        
+        Output a vtk representation of the Octree that can be viewed in Paraview
+        '''
+        
+        def getTree(node):
+            if node.level==1:
+                getNodeRep(node)             
+            for branch in node.branches:
+                getNodeRep(branch)
+                getTree(branch)        
+                
+        def getNodeRep(node):
+            offsets = {0:(-1,-1,-1),1:(+1,-1,-1),2:(+1,+1,-1),3:(-1,+1,-1),
+                       4:(-1,-1,+1),5:(+1,-1,+1),6:(+1,+1,+1),7:(-1,+1,+1)} 
+            connect = []
+            for i in range(8):
+                vi = node.position + 0.5*node.size*np.array(offsets[i])
+                connect.append(len(vertexCoords))
+                vertexCoords.append(vi)                       
+            vertexConnect.append(connect)               
+               
+        # For every node in tree, get vertex coordinates and connectivity
+        vertexCoords  = []     
+        vertexConnect = []
+        getTree(self.root)
+        
+        # Convert to vtk unstructured grid
+        uGrid = vtk.vtkUnstructuredGrid()
+        
+        # 1. Convert vertices and add to unstructured grid
+        coords = vtk.vtkFloatArray()
+        coords.SetNumberOfComponents(3)
+        for v in vertexCoords:
+            coords.InsertNextTuple(tuple(v))
+        vertices = vtk.vtkPoints()    
+        vertices.SetData(coords)
+        uGrid.SetPoints(vertices)
+        
+        # 2. Add element data to unstructured grid
+        numElems = len(vertexConnect)
+        for i in xrange(numElems):
+            hexelem = vtk.vtkHexahedron()
+            c = vertexConnect[i]
+            for j in range(8):
+                hexelem.GetPointIds().SetId(j,c[j])    
+            uGrid.InsertNextCell(hexelem.GetCellType(), hexelem.GetPointIds()) 
+            
+        # Write unstructured grid to file
+        writer = vtk.vtkXMLUnstructuredGridWriter()
+        writer.SetFileName(fileName)
+        writer.SetInput(uGrid)
+        writer.SetDataModeToAscii()
+        writer.Write()
+        
     property numPolys:
         def __get__(self):
             return self.thisptr.numPolys()
@@ -262,6 +340,10 @@ cdef class PyOctnode:
         # to an existing cOctNode object
         self.thisptr = NULL
         self.parent  = parent
+        
+    def __dealloc__(self):
+        # No need to dealloc - cOctNodes are managed by cOctree
+        pass        
         
     def hasPolyLabel(self,label):
         '''
@@ -353,20 +435,17 @@ cdef class PyOctnode:
                 position[i] = self.thisptr.position[i]
             return position
 
-    def __dealloc__(self):
-        # No need to dealloc - cOctNodes are managed by cOctree
-        pass
-
 
 cdef class PyTri:
     cdef cTri *thisptr
     def __cinit__(self):
         self.thisptr = NULL     
+    def __dealloc__(self):
+        # No need to dealloc - cTris are managed by cOctree
+        pass        
     property label:
         def __get__(self):
             return self.thisptr.label
-        #def __set__(self,label):
-        #    self.thisptr.label = label 
     property vertices:
         def __get__(self):
             cdef np.ndarray[float64,ndim=2] vertices = np.zeros((3,3))
@@ -384,10 +463,7 @@ cdef class PyTri:
             return N
     property D:
         def __get__(self):
-            return self.thisptr.D	
-    def __dealloc__(self):
-        # No need to dealloc - cTris are managed by cOctree
-        pass
+            return self.thisptr.D
 
 
 # Need a global function to be able to point a cOctNode to a PyOctnode
