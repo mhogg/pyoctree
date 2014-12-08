@@ -114,6 +114,8 @@ cdef class PyOctree:
         
     def getNodesFromLabel(self,int label):
         '''
+        getNodesFromLabel(int label)
+        
         Returns a list of PyOctnodes that the polygon with the given label
         is contained within 
         '''
@@ -130,6 +132,12 @@ cdef class PyOctree:
             return nodeList     
             
     def getNodesFromRay(self,np.ndarray[float,ndim=2] _rayPoints):
+        '''
+        getNodesFromRay(np.ndarray[float,ndim=2] _rayPoints)
+        
+        Returns a list of PyOctnodes that intersect with the given ray. The 
+        nodes are sorted in order of distance from the ray origin
+        '''
         cdef int i
         cdef vector[double] p0, p1
         p0.resize(3)
@@ -151,6 +159,8 @@ cdef class PyOctree:
                     
     def getNodeFromId(self,string nodeId):
         '''
+        getNodeFromId(string nodeId)
+        
         Returns a PyOctnode given the node string id i.e. '0' for root and 
         '0-0' for first branch
         '''
@@ -162,7 +172,10 @@ cdef class PyOctree:
 
     def getListOfPolysToCheck(self,np.ndarray[float,ndim=2] _rayPoints):
         '''
-        Returns a list of polygons that should be tested for intersections
+        getListOfPolysToCheck(np.ndarray[float,ndim=2] _rayPoints)
+        
+        Returns a list of polygons that should be tested for intersections with
+        the given ray
         '''
         cdef int i
         cdef vector[double] p0, p1
@@ -184,8 +197,10 @@ cdef class PyOctree:
         
     def rayIntersection(self,np.ndarray[float,ndim=2] _rayPoints):
         '''
-        Input:  Array of (1,2) points representing a single ray
-        Output: List of type Intersect, or empty list if no intersections found
+        rayIntersection(np.ndarray[float,ndim=2] _rayPoints)
+        
+        Finds and returns a list of all intersection points between the tree
+        polys and the given ray 
         '''	
         cdef int i
         cdef vector[double] p0, p1
@@ -206,8 +221,11 @@ cdef class PyOctree:
 
     def rayIntersections(self,np.ndarray[float,ndim=3] _rayList):
         '''
-        Input:  Array of (n,2,3) points representing rays
-        Output: Array of bool indicating if intersection was found or not
+        rayIntersections(np.ndarray[float,ndim=3] _rayList
+        
+        For every ray in the list provided, returns a corresponding array of 
+        integers indicating if a intersection occurred or not. This array can
+        be used to create an shadow image of the tree mesh part
         '''
         cdef int i,j
         cdef vector[double] p0, p1
@@ -255,7 +273,11 @@ cdef class PyOctnode:
         self.parent  = parent
         
     def hasPolyLabel(self,label):
-        """ Checks if poly with given label is in node """
+        '''
+        hasPolyLabel(label)
+        
+        Checks if poly with given label is in the current node
+        '''
         cdef int numPolys  = self.thisptr.numPolys()
         cdef int i
         for i in range(numPolys):
@@ -264,6 +286,12 @@ cdef class PyOctnode:
         return False  
         
     def boxRayIntersect(self,np.ndarray[float,ndim=2] _rayPoints):
+        '''
+        boxRayIntersect(self,np.ndarray[float,ndim=2] _rayPoints)
+        
+        Determines if an intersection occurs between the given ray and the
+        current node
+        '''
         cdef int i
         cdef vector[double] p0, p1
         p0.resize(3)
@@ -346,8 +374,8 @@ cdef class PyTri:
     property label:
         def __get__(self):
             return self.thisptr.label
-        def __set__(self,label):
-            self.thisptr.label = label 
+        #def __set__(self,label):
+        #    self.thisptr.label = label 
     property vertices:
         def __get__(self):
             cdef np.ndarray[float64,ndim=2] vertices = np.zeros((3,3))
