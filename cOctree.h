@@ -28,12 +28,6 @@ typedef struct intersection
         return (s < intersect.s); }
 } Intersection;
 
-//struct cmp_by_first {
-//  template<typename T>
-//  bool operator < (const  T&x, const T& y) const { 
-//      return (x.first < y.first); }
-//};
-
 class cLine {
 public:
 
@@ -108,7 +102,8 @@ public:
     set<int> getListPolysToCheck(cLine &ray);    
     vector<double> getPositionRoot();	
     vector<Intersection> findRayIntersect(cLine &ray);    
-    vector<int> findRayIntersects(vector<cLine> &rayList);		
+    vector<int> findRayIntersects(vector<cLine> &rayList);
+    vector<int> findRayIntersectsSorted(vector<cLine> &rayList);		
     vector<cOctNode*> getNodesFromLabel(int polyLabel);	
     vector<cOctNode*> getSortedNodesToCheck(cLine &ray);
     void insertPoly(cOctNode &node, cTri &poly);

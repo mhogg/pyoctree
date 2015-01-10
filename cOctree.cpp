@@ -5,6 +5,7 @@
 
 cLine::cLine() 
 {
+    // Default constructor for cLine 
     // Default line is unit vector along x-axis
     p0.resize(3,0.0); p1.resize(3,0.0); dir.resize(3,0.0);
     p1[0]=1.0; dir[0]=1.0;
@@ -12,6 +13,7 @@ cLine::cLine()
 
 cLine::cLine(vector<double> &_p0, vector<double> &p1_dir, int isP1orDir)
 {
+    // cLine constructor with p0 and p1 or dir
     // if isP1orDir==0, then p1_dir is p1
     // if isP1orDir==1, then p1_dir is dir
     p0 = _p0;
@@ -23,10 +25,12 @@ cLine::cLine(vector<double> &_p0, vector<double> &p1_dir, int isP1orDir)
         getP1(); }
 }
 
+// cLine destructor
 cLine::~cLine() {}
 
 void cLine::getDir()
 {
+    // Get unit vector defining direction of cLine
     vector<double> p0p1(3); double dmag=0.0;
     for (unsigned int i=0; i<3; i++) {
         p0p1[i] = p1[i]-p0[i];
@@ -39,6 +43,7 @@ void cLine::getDir()
 
 void cLine::getP1()
 {
+    // Get a point on the cLine, p1, located 1.0 units away from the origin, p0
     vector<double> p1(3);
     for (unsigned int i=0; i<3; i++)
         p1[i] = p0[i]+dir[i];
@@ -48,7 +53,7 @@ void cLine::getP1()
 
 cTri::cTri()
 {
-    // Default tri
+    // Default cTri constructor
     label = 0;
     vertices.resize(3);
     for (vector<vector<double> >::iterator it=vertices.begin(); it!=vertices.end(); ++it)
@@ -62,6 +67,7 @@ cTri::cTri()
 
 cTri::cTri(int _label, vector<vector<double> > _vertices)
 {
+    // cTri constructor with label and vertices
     label    = _label;
     vertices = _vertices;
     getN();
@@ -70,12 +76,14 @@ cTri::cTri(int _label, vector<vector<double> > _vertices)
     getUpperVert();
 }
 
+// cTri destructor
 cTri::~cTri() {
     //cout << "Destroying cTri" << endl;
 }
 
 void cTri::getN()
 {
+    // Get cTri face normal
     vector<vector<double> > v = vertices;
     vector<double> v1(3),v2(3),v3;
     for (unsigned int i=0; i<3; i++) {
@@ -90,11 +98,14 @@ void cTri::getN()
 
 void cTri::getD()
 {
+    // Perp distance of cTri face from origin which, along with the face normal,
+    // defines the plane of the cTri face
     D = dotProduct(vertices[0],N);
 }
 
 void cTri::getLowerVert()
 {
+    // Lower vertices of cTri bounding box
     lowVert.resize(3,1.0e+30);
     for (int j=0; j<3; j++) {
         for (int i=0; i<3; i++) {
@@ -108,6 +119,7 @@ void cTri::getLowerVert()
 
 void cTri::getUpperVert()
 {
+    // Upper vertices of cTri bounding box
     uppVert.resize(3,-1.0e+30);
     for (int j=0; j<3; j++) {
         for (int i=0; i<3; i++) {
@@ -121,6 +133,9 @@ void cTri::getUpperVert()
 
 bool cTri::isInNode(cOctNode &node)
 {
+    // Tests if bounding box of cTri is inside of or overlapping the given cOctNode
+    // This is a simple test and even if bounding box is found to be inside the
+    // cOctNode, the cTri itself may not be
     if (lowVert[0] > node.upp[0]) return false;
     if (lowVert[1] > node.upp[1]) return false;
     if (lowVert[2] > node.upp[2]) return false;
@@ -132,7 +147,7 @@ bool cTri::isInNode(cOctNode &node)
 
 bool cTri::isPointInTri(vector<double> &p)
 {
-    // Determines if point p is within a triangle by computing and
+    // Determines if point p is within the cTri by computing and
     // testing the barycentric coordinates (u, v, w) of p
 
     // Find Barycentric coordinates of point (u,v,w)
@@ -149,15 +164,16 @@ bool cTri::isPointInTri(vector<double> &p)
     double w = (d00 * d21 - d01 * d20) / denom;
     double u = 1.0 - v - w;
 
-    // Use Barycentric coordinates to work out if point lies within the tri element
+    // Use Barycentric coordinates to work out if point lies within the cTri element
     double tol = 0.0;	
     return ((v>=tol) && (w>=tol) && (u>=tol));
 }
 
 bool cTri::rayPlaneIntersectPoint(cLine &ray, bool entryOnly=false)
 {
-    // NOTE: Provide option to just check for entry intersections, not both entries/exits
-    //       This should cut down checking by roughly half
+    // Tests if ray intersects with the cTri face
+    // NOTE: Provide option to just check for entry intersections, not both 
+    //       entries/exits. This should cut down checking somewhat.
     double tol  = 1.0e-06;
     double sDen = dotProduct(ray.dir,N);
     if ((entryOnly && sDen>tol) || (!entryOnly && fabs(sDen)>tol))
@@ -172,6 +188,9 @@ bool cTri::rayPlaneIntersectPoint(cLine &ray, bool entryOnly=false)
 
 bool cTri::rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s)
 {
+    // Tests if ray intersects with the cTri face 
+    // Returns the coordinates of the intersection point and the distance, s, from
+    // the origin of the ray   
     double tol  = 1.0e-06;
     double sDen = dotProduct(ray.dir,N);
     if (fabs(sDen)> tol) // Normals cannot be perpendicular such that dot product equals 0
@@ -188,6 +207,7 @@ bool cTri::rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s)
 
 cOctNode::cOctNode()
 {  
+    // Default octNode constructor
     level = 0;
     nid   = "";
     size  = 1.0;
@@ -198,6 +218,7 @@ cOctNode::cOctNode()
 
 cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _size)
 {
+    // octNode constructor with level, node id (nid), position and size
     level    = _level;
     nid      = _nid;
     position = _position;
@@ -206,14 +227,21 @@ cOctNode::cOctNode(int _level, string _nid, vector<double> _position, double _si
     data.reserve(MAX_OCTNODE_OBJECTS);    
 }
 
+// octNode destructor
 cOctNode::~cOctNode() {
     //cout << "Calling destructor for cOctnode " << nid << endl;
 }
 
-bool cOctNode::isLeafNode() { return branches.size()==0; }
+bool cOctNode::isLeafNode() 
+{ 
+    // Checks if cOctNode is a leaf node by counting the number of branches. A 
+    // leaf node has no branches
+    return branches.size()==0; 
+}
 
 void cOctNode::getLowUppVerts() 
 {
+    // Get coordinates of the lower and upper vertices of the cOctNode
     low.resize(3);
     upp.resize(3);
     double halfSize = size/2.0;
@@ -570,11 +598,13 @@ vector<Intersection> cOctree::findRayIntersect(cLine &ray)
     return intersectList;
 }
 
-/*
 vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
 {
     // For each ray provided, determines if ray hits a poly in the tree and 
     // returns a boolean integer. Uses openmp to speed up the calculation
+    // Function findRayIntersectsSorted is a similar function that sorts the
+    // triangles in order of closest octNodes. For ray casting, this alternative
+    // function should be faster in most cases
     
     int numRays = (int)(rayList.size());
     vector<int> foundIntsects(numRays,0);
@@ -591,9 +621,8 @@ vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
     }
     return foundIntsects;
 }
-*/
 
-vector<int> cOctree::findRayIntersects(vector<cLine> &rayList)
+vector<int> cOctree::findRayIntersectsSorted(vector<cLine> &rayList)
 {
     // For each ray provided, determines if ray hits a poly in the tree and 
     // returns a boolean integer. 

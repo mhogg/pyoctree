@@ -54,6 +54,7 @@ cdef extern from "cOctree.h":
         vector[cTri] polyList		
         vector[cOctNode*] getNodesFromLabel(int polyLabel)
         vector[bint] findRayIntersects(vector[cLine] &rayList)
+        vector[bint] findRayIntersectsSorted(vector[cLine] &rayList)
         set[int] getListPolysToCheck(cLine &ray)
         vector[cOctNode*] getSortedNodesToCheck(cLine &ray)
     
@@ -229,7 +230,7 @@ cdef class PyOctree:
                 p0[j] = _rayList[i][0][j]
                 p1[j] = _rayList[i][1][j]
             rayList.push_back(cLine(p0,p1,0))
-        cdef vector[bint] ints = self.thisptr.findRayIntersects(rayList)
+        cdef vector[bint] ints = self.thisptr.findRayIntersectsSorted(rayList)
         cdef np.ndarray[int32,ndim=1] foundInts = np.zeros(_rayList.shape[0],dtype=np.int32)
         for i in range(_rayList.shape[0]):
             foundInts[i] = ints[i]
@@ -377,10 +378,15 @@ cdef class PyOctnode:
         return result
         
     property isLeaf:
+        '''Checks if node is a leaf (has no branches)'''
         def __get__(self):
             return self.thisptr.isLeafNode()  
 
     property branches:
+        '''
+        Returns a list of all octNode branches. If node is a leaf, returns 
+        an empty list
+        '''
         def __get__(self):
             branches = []
             cdef int numBranches = self.thisptr.branches.size()
@@ -393,6 +399,10 @@ cdef class PyOctnode:
             return branches 
 
     property polyList:
+        '''
+        Returns a list of all the polygon indices (with respect to the cOctree
+        polyList) within the given node 
+        '''
         def __get__(self):
             cdef list polyList = []
             cdef int numPolys  = self.thisptr.numPolys()
@@ -402,6 +412,10 @@ cdef class PyOctnode:
             return polyList
             
     property polyListAsString:
+        '''
+        Similar to polyList property, but returns a comma delimited string 
+        rather than a list
+        '''
         def __get__(self):
             cdef int numPolys = self.thisptr.numPolys()
             cdef int i
@@ -411,22 +425,27 @@ cdef class PyOctnode:
             return s
 
     property level:
+        '''octNode level'''
         def __get__(self):
             return self.thisptr.level  
 
     property nid:
+        '''octNode node id'''
         def __get__(self):
             return self.thisptr.nid  
                                  
     property numPolys:
+        '''Number of polygons in given octNode'''
         def __get__(self):
             return self.thisptr.numPolys()
 
     property size:
+        '''Size of octNode bounding box'''
         def __get__(self):
             return self.thisptr.size
 
     property position:
+        '''Coordinates of octNode centre'''
         def __get__(self):
             cdef int dims = self.thisptr.position.size()
             cdef int i
@@ -444,9 +463,11 @@ cdef class PyTri:
         # No need to dealloc - cTris are managed by cOctree
         pass        
     property label:
+        '''Tri label'''
         def __get__(self):
             return self.thisptr.label
     property vertices:
+        '''Array of tri vertices'''
         def __get__(self):
             cdef np.ndarray[float64,ndim=2] vertices = np.zeros((3,3))
             cdef int i, j
@@ -455,6 +476,7 @@ cdef class PyTri:
                     vertices[i,j] = self.thisptr.vertices[i][j]
             return vertices
     property N:
+        '''Tri face normal'''
         def __get__(self):
             cdef np.ndarray[float64,ndim=1] N = np.zeros(3)
             cdef int i
@@ -462,6 +484,7 @@ cdef class PyTri:
                 N[i] = self.thisptr.N[i]
             return N
     property D:
+        '''Perp. distance from tri face to origin'''
         def __get__(self):
             return self.thisptr.D
 
