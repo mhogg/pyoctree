@@ -314,7 +314,7 @@ cdef class PyOctree:
         # Write unstructured grid to file
         writer = vtk.vtkXMLUnstructuredGridWriter()
         writer.SetFileName(fileName)
-        writer.SetInput(uGrid)
+        writer.SetInputData(uGrid)
         writer.SetDataModeToAscii()
         writer.Write()
         
