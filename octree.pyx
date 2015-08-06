@@ -1,7 +1,6 @@
 
 # cython: profile=False
 
-import vtk
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -260,8 +259,14 @@ cdef class PyOctree:
         '''
         getOctreeRep(fileName='octree.vtu')
         
-        Output a vtk representation of the Octree that can be viewed in Paraview
+        Output a vtk representation of the Octree that can be viewed in Paraview. This
+        requires the vtk python module
         '''
+        
+        try: import vtk
+        except:
+            print 'Error: Cannot import required vtk module' 
+            return
         
         def getTree(node):
             if node.level==1:
