@@ -5,26 +5,23 @@ Octree structure containing a triangular mesh. To be used for ray tracing / shad
 
 Written in C++ for speed, but exposed to Python using Cython.
 
----
 
-# Details
+## Details
 
 Octree structure is adaptive, so it will automatically divide branches to ensure that there are no more than 200 objects per leaf.
 
 Intersection testing uses parallel processing via OpenMP. To use more than a single processor, set value of environment variable OMP_NUM_THREADS to number of desired processors.  
 
----
 
-# Requirements
+## Requirements
 
 * vtk >= v6.2.0 (optional, for outputting a vtk file for viewing octree structure in Paraview)
 * Cython >= v0.20 and a C++ compiler for compiling from source (optional)
 
----
 
-# Usage
+## Usage
 
-## 1. Creating the octree representation of a 3D triangular mesh 
+### 1. Creating the octree representation of a 3D triangular mesh 
 
 ```python
 import octree
@@ -37,9 +34,8 @@ where:
 
 * connectivity is a Nx3 numpy array of integers (dtype=np.int32) representing the point connectivity of each tri element in the mesh 
 
----
 
-# 2. Finding intersection between mesh object and ray
+### 2. Finding intersection between mesh object and ray
 
 Two functions _rayIntersection_ and _rayIntersections_ are available for intersection testing. 
 
@@ -52,8 +48,7 @@ intersectionPoints = tree.rayIntersections(ray)
 intersectionFound  = tree.rayIntersection(ray)
 ```
 
----
 
-# Help
+## Help
 
 If help is required, please create an issue on Github.
