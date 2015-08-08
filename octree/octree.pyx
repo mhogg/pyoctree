@@ -316,7 +316,7 @@ cdef class PyOctree:
         writer.SetFileName(fileName)
         writer.SetInputData(uGrid)
         writer.SetDataModeToAscii()
-        writer.Write()
+        writer.Write()      
         
     property numPolys:
         def __get__(self):
@@ -382,6 +382,12 @@ cdef class PyOctnode:
         cdef bint result = self.thisptr.boxRayIntersect(ray)
         return result
         
+    def __str__(self):
+        return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('OctNode', self.nid, self.isLeaf, self.numPolys)
+        
+    def __repr__(self):
+        return "<%s %s>" % ('OctNode', self.nid)
+        
     property isLeaf:
         '''Checks if node is a leaf (has no branches)'''
         def __get__(self):
@@ -437,8 +443,8 @@ cdef class PyOctnode:
     property nid:
         '''octNode node id'''
         def __get__(self):
-            return self.thisptr.nid  
-                                 
+            return self.thisptr.nid
+            
     property numPolys:
         '''Number of polygons in given octNode'''
         def __get__(self):
@@ -466,7 +472,11 @@ cdef class PyTri:
         self.thisptr = NULL     
     def __dealloc__(self):
         # No need to dealloc - cTris are managed by cOctree
-        pass        
+        pass
+    def __str__(self):
+        return "<%s %d>" % ('PyTri', self.label)
+    def __repr__(self):
+        return "<%s %d>" % ('PyTri', self.label)
     property label:
         '''Tri label'''
         def __get__(self):
