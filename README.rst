@@ -6,6 +6,14 @@ ray tracing / shadow casting.
 
 Written in C++ for speed, but exposed to Python using Cython.
 
+.. image:: https://img.shields.io/pypi/v/pyoctree.svg
+   :target: https://pypi.python.org/pypi/pyoctree/
+   :alt: Latest PyPI version
+   
+.. image:: https://img.shields.io/pypi/dm/pyoctree.svg
+   :target: https://pypi.python.org/pypi/pyoctree/
+   :alt: Number of PyPI downloads
+   
 Details
 -------
 
