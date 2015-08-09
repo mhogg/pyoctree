@@ -2,9 +2,9 @@
 
 # Copyright (C) 2015 Michael Hogg
 
-# This file is part of octree - See LICENSE.txt for information on usage and redistribution
+# This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
-import octree
+import pyoctree
 
 from distutils.core import setup
 from distutils.extension import Extension
@@ -19,22 +19,22 @@ else:
 cmdclass    = {}
 ext_modules = []
 if use_cython:  
-    ext_modules += [ Extension("octree.octree", sources=["octree/octree.pyx","octree/cOctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cpyoctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
     cmdclass.update({ 'build_ext':build_ext })
 else:
-    ext_modules += [ Extension("octree.octree", sources=["octree/octree.cpp","octree/cOctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cpyoctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
     
 setup(
-    name = 'octree',
-    version = octree.__version__,
-    description = 'Octree structure to represent 3D model containing tri faces',
+    name = 'pyoctree',
+    version = pyoctree.__version__,
+    description = 'Octree structure containing 3D triangular mesh model',
     license = 'MIT license',
     keywords = ["octree","triangle","mesh","python","cython"],    
     author = 'Michael Hogg',
     author_email = 'michael.christopher.hogg@gmail.com',
-    url = "https://github.com/mhogg/octree",
-    download_url = "https://github.com/mhogg/octree/releases", 
-    packages = ['','octree'],
+    url = "https://github.com/mhogg/pyoctree",
+    download_url = "https://github.com/mhogg/pyoctree/releases", 
+    packages = ['','pyoctree'],
     package_data = {'':['LICENSE.txt','README.md','setup.py','Examples/*']},
     classifiers = [
         "Programming Language :: Python",                                  
@@ -49,5 +49,5 @@ setup(
         ],
     ext_modules = ext_modules,
     cmdclass = cmdclass,
-    long_description = """Octree structure to represent 3D model containing tri faces""",
+    long_description = """Octree structure containing 3D triangular mesh model""",
 )

@@ -1,14 +1,14 @@
-octree
-======
+pyoctree
+========
 
-Octree structure containing a triangular mesh. To be used for ray tracing / shadow casting.
+Octree structure containing a 3D triangular mesh model. To be used for ray tracing / shadow casting.
 
 Written in C++ for speed, but exposed to Python using Cython.
 
 
 ## Details
 
-Octree structure is adaptive, so it will automatically divide branches to ensure that there are no more than 200 objects per leaf.
+Pyoctree uses an adaptive structure, so it will automatically divide branches to ensure that there are no more than 200 objects per leaf.
 
 Intersection testing uses parallel processing via OpenMP. To use more than a single processor, set value of environment variable OMP_NUM_THREADS to number of desired processors.  
 
@@ -21,11 +21,11 @@ Intersection testing uses parallel processing via OpenMP. To use more than a sin
 
 ## Usage
 
-### 1. Creating the octree representation of a 3D triangular mesh 
+### 1. Creating the octree representation of a 3D triangular mesh model
 
 ```python
-import octree
-tree = octree.PyOctree(pointCoords,connectivity)
+from pyoctree import pyoctree as ot
+tree = ot.PyOctree(pointCoords,connectivity)
 ```
 
 where:
@@ -50,7 +50,7 @@ intersectionFound  = tree.rayIntersection(rayList)
 
 ## Examples
 
-Some IPython notebooks are provided in the Examples directory on how to use octree.
+Some IPython notebooks are provided in the Examples directory on how to use pyoctree.
 
 
 ## Help

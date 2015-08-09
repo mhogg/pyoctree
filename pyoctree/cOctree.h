@@ -1,4 +1,8 @@
 
+// Copyright (C) 2015 Michael Hogg
+
+// This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
+
 #include <iostream>
 #include <vector>
 #include <set>
