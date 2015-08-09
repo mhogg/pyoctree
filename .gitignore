@@ -56,7 +56,7 @@ build/
 *.vtu
 *.bat
 *.html
-octree.cpp
+pyoctree.cpp
 .ipynb_checkpoints/
 dev/
 dist/

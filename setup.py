@@ -19,10 +19,10 @@ else:
 cmdclass    = {}
 ext_modules = []
 if use_cython:  
-    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cpyoctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
     cmdclass.update({ 'build_ext':build_ext })
 else:
-    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cpyoctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
     
 setup(
     name = 'pyoctree',
@@ -49,5 +49,5 @@ setup(
         ],
     ext_modules = ext_modules,
     cmdclass = cmdclass,
-    long_description = """Octree structure containing 3D triangular mesh model""",
+    long_description = """Octree structure containing 3D triangular mesh model\n\nWritten in C++ for speed, but exposed to Python using Cython.""",
 )

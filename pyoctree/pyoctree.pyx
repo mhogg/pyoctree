@@ -388,10 +388,10 @@ cdef class PyOctnode:
         return result
         
     def __str__(self):
-        return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('OctNode', self.nid, self.isLeaf, self.numPolys)
+        return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('PyOctNode', self.nid, self.isLeaf, self.numPolys)
         
     def __repr__(self):
-        return "<%s %s>" % ('OctNode', self.nid)
+        return "<%s %s>" % ('PyOctNode', self.nid)
         
     property isLeaf:
         '''Checks if node is a leaf (has no branches)'''
