@@ -60,3 +60,4 @@ octree.cpp
 .ipynb_checkpoints/
 dev/
 dist/
+MANIFEST
