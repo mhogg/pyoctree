@@ -54,7 +54,9 @@ build/
 *.pyc
 *.pyd
 *.vtu
+*.bat
+*.html
 octree.cpp
-Rectangle/
 .ipynb_checkpoints/
 dev/
+dist/

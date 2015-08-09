@@ -1,0 +1,7 @@
+include *.in
+include *.txt
+include *.md
+recursive-include octree *.pyd
+recursive-include octree *.pyx
+recursive-include octree *.cpp
+recursive-include Examples *.*

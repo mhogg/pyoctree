@@ -5,5 +5,4 @@
 # This file is part of octree - See LICENSE.txt for information on usage and redistribution
 
 # Version and date
-import version
-__version__     = version.version
+version     = '0.1.0'
