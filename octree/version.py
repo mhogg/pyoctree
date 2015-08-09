@@ -4,5 +4,5 @@
 
 # This file is part of octree - See LICENSE.txt for information on usage and redistribution
 
-# Version and date
+# Version
 version     = '0.1.0'
