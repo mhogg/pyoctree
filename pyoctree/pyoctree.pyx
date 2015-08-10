@@ -333,7 +333,7 @@ cdef class Intersect:
     cdef public np.ndarray p
     def __init__(self):
         self.s = 0.0
-        self.p = np.zeros(3,dtype=float)     
+        self.p = np.zeros(3,dtype=float)
     cdef SetValues(self,vector[double] p, double s):
         cdef int i
         for i in range(3):
@@ -354,7 +354,7 @@ cdef class PyOctnode:
         
     def __dealloc__(self):
         # No need to dealloc - cOctNodes are managed by cOctree
-        pass        
+        pass
         
     def hasPolyLabel(self,label):
         '''
@@ -370,34 +370,19 @@ cdef class PyOctnode:
         cdef int numPolys  = self.thisptr.numPolys()
         cdef int i
         for i in range(numPolys):
-            if self.thisptr.data[i]==label: 
+            if self.thisptr.data[i]==label:
                 return True
-        return False  
+        return False
         
-    cdef boxRayIntersect(self,np.ndarray[float,ndim=2] _rayPoints):
-        '''
-        boxRayIntersect(self,np.ndarray[float,ndim=2] _rayPoints)
-        
-        Determines if an intersection occurs between the given ray and the
-        current node
-        '''
-        cdef int i
-        cdef vector[double] p0, p1
-        p0.resize(3)
-        p1.resize(3)
-        for i in range(3):
-            p0[i] = _rayPoints[0][i]
-            p1[i] = _rayPoints[1][i]
-        cdef cLine ray = cLine(p0,p1,0)
-        cdef bint result = self.thisptr.boxRayIntersect(ray)
-        return result
+    cdef printWarningMsg(self):
+        print 'PyOctnode is managed by PyOctree'
         
     def __str__(self):
         if self.thisptr==NULL: return "<%s>" % ('PyOctnode')
         return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('PyOctnode', self.nid, self.isLeaf, self.numPolys)
         
     def __repr__(self):
-        if self.thisptr==NULL: return "<%s>" % ('PyOctnode')    
+        if self.thisptr==NULL: return "<%s>" % ('PyOctnode')
         return "<%s %s>" % ('PyOctnode', self.nid)
         
     property isLeaf:
@@ -405,30 +390,30 @@ cdef class PyOctnode:
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object          
+            # If C++ object
             return self.thisptr.isLeafNode()
         def __set__(self,_isLeaf):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg()
 
     property branches:
         '''
-        Returns a list of all octNode branches. If node is a leaf, returns 
+        Returns a list of all octNode branches. If node is a leaf, returns
         an empty list
         '''
         def __get__(self):
 
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
 
-            # If C++ object        
+            # If C++ object
             branches = []
             cdef int numBranches = self.thisptr.branches.size()
             cdef int i
-            cdef cOctNode *node = NULL 
+            cdef cOctNode *node = NULL
             for i in range(numBranches):
                 node = &self.thisptr.branches[i]
                 branches.append(PyOctnode_Init(node,self))
@@ -436,21 +421,21 @@ cdef class PyOctnode:
             return branches
             
         def __set__(self,_branches):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg()
 
     property polyList:
         '''
         Returns a list of all the polygon indices (with respect to the cOctree
-        polyList) within the given node 
+        polyList) within the given node
         '''
         def __get__(self):
             
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
             
-            # If C++ object        
+            # If C++ object
             cdef list polyList = []
             cdef int numPolys  = self.thisptr.numPolys()
             cdef int i
@@ -459,7 +444,7 @@ cdef class PyOctnode:
             return polyList
             
         def __set__(self,_polyList):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg() 
             
     property polyListAsString:
         '''
@@ -470,10 +455,10 @@ cdef class PyOctnode:
             
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
             
-            # If C++ object        
+            # If C++ object
             cdef int numPolys = self.thisptr.numPolys()
             cdef int i
             s = str(self.thisptr.data[0])
@@ -482,64 +467,64 @@ cdef class PyOctnode:
             return s
             
         def __set__(self,_polyListAsString):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg()   
 
     property level:
         '''octNode level'''
-        def __get__(self):  
+        def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object     
+            # If C++ object
             return self.thisptr.level
         def __set__(self,_level):
-            print 'PyOctnode is managed by PyOctree'  
+            self.printWarningMsg()
 
     property nid:
         '''octNode node id'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object          
+            # If C++ object
             return self.thisptr.nid
         def __set__(self,_nid):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg()    
             
     property numPolys:
         '''Number of polygons in given octNode'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object          
+            # If C++ object
             return self.thisptr.numPolys()
         def __set__(self,_numPolys):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg()
 
     property size:
         '''Size of octNode bounding box'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object          
+            # If C++ object
             return self.thisptr.size
         def __set__(self,_size):
-            print 'PyOctnode is managed by PyOctree'              
+            self.printWarningMsg()
 
     property position:
         '''Coordinates of octNode centre'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyOctnode is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object        
+            # If C++ object
             cdef int dims = self.thisptr.position.size()
             cdef int i
             cdef np.ndarray[float64,ndim=1] position = np.zeros(3,dtype=np.float64)
@@ -547,7 +532,7 @@ cdef class PyOctnode:
                 position[i] = self.thisptr.position[i]
             return position
         def __set__(self,_position):
-            print 'PyOctnode is managed by PyOctree'            
+            self.printWarningMsg()
 
 
 cdef class PyTri:
@@ -556,7 +541,7 @@ cdef class PyTri:
         self.thisptr = NULL
     def __init__(self):
         # User may try to create a new PyTri instance. But all PyTris
-        # are created / managed by the PyOctree when first created 
+        # are created / managed by the PyOctree when first created
         pass
     def __dealloc__(self):
         # No need to dealloc - cTris are managed by cOctree
@@ -567,23 +552,25 @@ cdef class PyTri:
     def __repr__(self):
         if self.thisptr==NULL: return "<%s>" % ('PyTri')
         return "<%s %d>" % ('PyTri', self.label)
+    cdef printWarningMsg(self):
+        print 'PyTri is managed by PyOctree'
     property label:
         '''Tri label'''
         def __get__(self):
-            # If Python object        
+            # If Python object
             if self.thisptr==NULL:
-                print 'PyTri is managed by PyOctree'
+                self.printWarningMsg()
                 return None
             # If C++ object
             return self.thisptr.label
         def __set__(self,_label):
-            print 'PyTri is managed by PyOctree'
+            self.printWarningMsg()
     property vertices:
         '''Array of tri vertices'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyTri is managed by PyOctree'
+                self.printWarningMsg()
                 return None
             # If C++ object
             cdef np.ndarray[float64,ndim=2] vertices = np.zeros((3,3))
@@ -593,33 +580,33 @@ cdef class PyTri:
                     vertices[i,j] = self.thisptr.vertices[i][j]
             return vertices
         def __set__(self,_vertices):
-            print 'PyTri is managed by PyOctree'
+            self.printWarningMsg()
     property N:
         '''Tri face normal'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyTri is managed by PyOctree'            
+                self.printWarningMsg()
                 return None
             # If C++ object
             cdef np.ndarray[float64,ndim=1] N = np.zeros(3)
-            cdef int i            
+            cdef int i
             for i in range(3):
                 N[i] = self.thisptr.N[i]
             return N
         def __set__(self,_N):
-            print 'PyTri is managed by PyOctree'        
+            self.printWarningMsg()
     property D:
         '''Perp. distance from tri face to origin'''
         def __get__(self):
             # If Python object
             if self.thisptr==NULL:
-                print 'PyTri is managed by PyOctree'
+                self.printWarningMsg()
                 return None
-            # If C++ object                
+            # If C++ object
             return self.thisptr.D
         def __set__(self,_D):
-            print 'PyTri is managed by PyOctree'
+            self.printWarningMsg()
 
 
 # Need a global function to be able to point a cOctNode to a PyOctnode
@@ -628,7 +615,7 @@ cdef PyOctnode_Init(cOctNode *node, object parent):
     result.thisptr = node
     return result
 
-    
+
 # Need a global function to be able to point a cTri to a PyTri
 cdef PyTri_Init(cTri *tri):
     result = PyTri()
