@@ -45,7 +45,8 @@ cdef extern from "cOctree.h":
         string nid
         vector[double] position
         vector[cOctNode] branches
-        vector[int] data        
+        vector[int] data
+        cOctNode()   
         int numPolys()
         bint isLeafNode()
         bint boxRayIntersect(cLine &ray)
@@ -348,14 +349,17 @@ cdef class PyOctnode:
     cdef public object parent
 
     def __cinit__(self,parent=None):
-        # self.thisptr will be set by global function PyOctnode_Init to point
-        # to an existing cOctNode object
         self.thisptr = NULL
         self.parent  = parent
+        # If parent is None, then create a new cOctNode instance. Otherwise, assume
+        # that PyOctree instance is managed by the PyOctree
+        if self.parent is None:
+            self.thisptr = new cOctNode()
         
     def __dealloc__(self):
-        # No need to dealloc - cOctNodes are managed by cOctree
-        pass
+        # If parent is None, then cOctNodes are not managed by cOctree
+        if self.parent is None:
+            del self.thisptr
         
     def hasPolyLabel(self,label):
         '''
@@ -363,11 +367,6 @@ cdef class PyOctnode:
         
         Checks if poly with given label is in the current node
         '''
-        
-        # If Python object
-        if self.thisptr==NULL: return False
-        
-        # If C++ object
         cdef int numPolys  = self.thisptr.numPolys()
         cdef int i
         for i in range(numPolys):
@@ -375,28 +374,21 @@ cdef class PyOctnode:
                 return True
         return False
         
-    cdef printWarningMsg(self):
-        print 'PyOctnode is managed by PyOctree'
+    cdef printWarningMsg(self,s):
+        print 'PyOctnode is managed by PyOctree: %s is read-only' % s
         
     def __str__(self):
-        if self.thisptr==NULL: return "<%s>" % ('PyOctnode')
         return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('PyOctnode', self.nid, self.isLeaf, self.numPolys)
         
     def __repr__(self):
-        if self.thisptr==NULL: return "<%s>" % ('PyOctnode')
         return "<%s %s>" % ('PyOctnode', self.nid)
         
     property isLeaf:
         '''Checks if node is a leaf (has no branches)'''
         def __get__(self):
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            # If C++ object
             return self.thisptr.isLeafNode()
         def __set__(self,_isLeaf):
-            self.printWarningMsg()
+            pass
 
     property branches:
         '''
@@ -404,13 +396,6 @@ cdef class PyOctnode:
         an empty list
         '''
         def __get__(self):
-
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-
-            # If C++ object
             branches = []
             cdef int numBranches = self.thisptr.branches.size()
             cdef int i
@@ -420,9 +405,10 @@ cdef class PyOctnode:
                 branches.append(PyOctnode_Init(node,self))
             node = NULL
             return branches
-            
         def __set__(self,_branches):
-            self.printWarningMsg()
+            if self.parent is not None:
+                self.printWarningMsg('PyOctnode.branches')
+            else: pass
 
     property polyList:
         '''
@@ -430,22 +416,14 @@ cdef class PyOctnode:
         polyList) within the given node
         '''
         def __get__(self):
-            
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            
-            # If C++ object
             cdef list polyList = []
             cdef int numPolys  = self.thisptr.numPolys()
             cdef int i
             for i in range(numPolys):
                 polyList.append(self.thisptr.data[i])
             return polyList
-            
         def __set__(self,_polyList):
-            self.printWarningMsg() 
+            pass
             
     property polyListAsString:
         '''
@@ -453,79 +431,50 @@ cdef class PyOctnode:
         rather than a list
         '''
         def __get__(self):
-            
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            
-            # If C++ object
             cdef int numPolys = self.thisptr.numPolys()
             cdef int i
+            if self.numPolys == 0: return ""
             s = str(self.thisptr.data[0])
             for i in range(1, numPolys):
                 s += ", " + str(self.thisptr.data[i])
-            return s
-            
+            return s            
         def __set__(self,_polyListAsString):
-            self.printWarningMsg()   
+            pass
 
     property level:
         '''octNode level'''
         def __get__(self):
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            # If C++ object
             return self.thisptr.level
         def __set__(self,_level):
-            self.printWarningMsg()
+            if self.parent is None: self.thisptr.level = _level
+            else: self.printWarningMsg('PyOctnode.level')
 
     property nid:
         '''octNode node id'''
         def __get__(self):
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            # If C++ object
             return self.thisptr.nid
         def __set__(self,_nid):
-            self.printWarningMsg()    
+            if self.parent is None: self.thisptr.nid = _nid
+            else: self.printWarningMsg('PyOctnode.nid')
             
     property numPolys:
         '''Number of polygons in given octNode'''
         def __get__(self):
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            # If C++ object
             return self.thisptr.numPolys()
         def __set__(self,_numPolys):
-            self.printWarningMsg()
+            pass
 
     property size:
         '''Size of octNode bounding box'''
         def __get__(self):
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            # If C++ object
             return self.thisptr.size
         def __set__(self,_size):
-            self.printWarningMsg()
+            if self.parent is None: self.thisptr.size = _size
+            else: self.printWarningMsg('PyOctnode.size')
 
     property position:
         '''Coordinates of octNode centre'''
         def __get__(self):
-            # If Python object
-            if self.thisptr==NULL:
-                self.printWarningMsg()
-                return None
-            # If C++ object
             cdef int dims = self.thisptr.position.size()
             cdef int i
             cdef np.ndarray[float64,ndim=1] position = np.zeros(3,dtype=np.float64)
@@ -533,7 +482,15 @@ cdef class PyOctnode:
                 position[i] = self.thisptr.position[i]
             return position
         def __set__(self,_position):
-            self.printWarningMsg()
+            cdef int i
+            if self.parent is None:
+                _position = np.array(_position)
+                if not (_position.shape == (3,) or _position.shape == (1,3)):
+                    print 'Error: position must be a 1x3 array'
+                    return
+                for i in range(3):
+                    self.thisptr.position[i] = _position[i]
+            else: self.printWarningMsg('PyOctnode.position')
 
 
 cdef class PyTri:
@@ -547,7 +504,7 @@ cdef class PyTri:
         if self.parent is None:
             self.thisptr = new cTri()
     def __dealloc__(self):
-        # If parent is None, then  cTris are managed by cOctree
+        # If parent is None, then cTris are not managed by cOctree
         if self.parent is None:
             del self.thisptr
     def __str__(self):
