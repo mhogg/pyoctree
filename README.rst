@@ -38,7 +38,7 @@ Installation
 1. Building from source
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-   In a command prompt, browse to the base directory containing the setup.py file and type:
+In a command prompt, browse to the base directory containing the setup.py file and type:
 
 .. code::
 
@@ -47,7 +47,7 @@ Installation
 2. Installation using Python wheel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.1.2-cp27-cp27m-win_amd64.whl. Then, open a command prompt, browse to the download directory and type:
+Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.1.2-cp27-cp27m-win_amd64.whl. Then, open a command prompt, browse to the download directory and type:
 
 .. code::
 
