@@ -5,4 +5,4 @@
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 # Version
-version     = '0.1.1'
+__version__ = '0.1.2'

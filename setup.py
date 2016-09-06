@@ -1,14 +1,26 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2015 Michael Hogg
+# Copyright (C) 2016 Michael Hogg
 
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
-import pyoctree
-
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup
+from setuptools.extension import Extension
+from codecs import open
+from os import path
 import numpy
+
+# get current path
+here = path.abspath(path.dirname(__file__))
+
+# function to open the readme file
+def readme():
+    with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+        return f.read()
+        
+# find the version
+exec(open(path.join('pyoctree','version.py')).read())
+
 try:
     from Cython.Distutils import build_ext
 except ImportError:
@@ -26,8 +38,9 @@ else:
     
 setup(
     name = 'pyoctree',
-    version = pyoctree.__version__,
+    version = __version__,
     description = 'Octree structure containing 3D triangular mesh model',
+    long_description = readme(),
     license = 'MIT license',
     keywords = ["octree","triangle","mesh","python","cython"],    
     author = 'Michael Hogg',
@@ -39,8 +52,7 @@ setup(
     classifiers = [
         "Programming Language :: Python",                                  
         "Programming Language :: Cython",         
-        "Programming Language :: Python :: 2",             
-        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",                                                   
         "Development Status :: 4 - Beta",                                  
         "Environment :: Other Environment", 
@@ -49,5 +61,4 @@ setup(
         ],
     ext_modules = ext_modules,
     cmdclass = cmdclass,
-    long_description = """Octree structure containing 3D triangular mesh model\n\nWritten in C++ for speed, but exposed to Python using Cython.""",
 )

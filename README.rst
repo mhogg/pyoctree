@@ -29,8 +29,17 @@ Requirements
 
 -  vtk >= v6.2.0 (optional, for outputting a vtk file for viewing octree
    structure in Paraview)
--  Cython >= v0.20 and a C++ compiler for compiling from source
-   (optional)
+-  Cython >= v0.20 and a C++ compiler for building the extension module. The Microsoft C++ 
+   Compiler for Python 2.7 or Mingw32 can both be used.
+   
+Building from source
+--------------------
+
+In a command prompt, browse to the base directory containing the setup.py file and type:
+
+.. code::
+
+    python setup.py install
 
 Usage
 -----
