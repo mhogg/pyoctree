@@ -32,14 +32,26 @@ Requirements
 -  Cython >= v0.20 and a C++ compiler for building the extension module. The Microsoft C++ 
    Compiler for Python 2.7 or Mingw32 can both be used.
    
-Building from source
---------------------
+Installation
+------------
 
-In a command prompt, browse to the base directory containing the setup.py file and type:
+1. Building from source
+~~~~~~~~~~~~~~~~~~~~~~~
+
+   In a command prompt, browse to the base directory containing the setup.py file and type:
 
 .. code::
 
-    python setup.py install
+   python setup.py install
+
+2. Installation using Python wheel
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.1.2-cp27-cp27m-win_amd64.whl. Then, open a command prompt, browse to the download directory and type:
+
+.. code::
+
+   pip install pyoctree-0.1.2-cp27-cp27m-win_amd64.whl
 
 Usage
 -----
