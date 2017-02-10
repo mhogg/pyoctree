@@ -6,4 +6,4 @@
 
 # Version
 import version
-__version__ = version.version
+__version__ = version.__version__
