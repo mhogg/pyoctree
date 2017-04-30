@@ -90,7 +90,7 @@ and a ray. For example:
 Examples
 --------
 
-Some IPython notebooks are provided in the Examples directory on how to
+Some Jupyter notebooks are provided in the Examples directory on how to
 use pyoctree.
 
 Help
