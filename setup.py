@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2016 Michael Hogg
+# Copyright (C) 2017 Michael Hogg
 
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
@@ -28,13 +28,29 @@ except ImportError:
 else:
     use_cython = True
 
+# Supply correct openmp compiler arguments depending on os. Based on SO question:
+# http://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
+BUILD_ARGS = {}
+BUILD_ARGS['msvc']    = ['/openmp', '/EHsc', ]
+BUILD_ARGS['mingw32'] = ['-fopenmp', ]
+BUILD_ARGS['gcc']     = ['-fopenmp', ]
+BUILD_ARGS['icc']     = ['-openmp',  ]
+
+class build_ext_compiler_check(build_ext):
+    def build_extensions(self):
+        compiler = self.compiler.compiler_type
+        args = BUILD_ARGS[compiler]
+        for ext in self.extensions:
+            ext.extra_compile_args = args
+        build_ext.build_extensions(self)
+
 cmdclass    = {}
 ext_modules = []
 if use_cython:  
-    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
-    cmdclass.update({ 'build_ext':build_ext })
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],language="c++")]
+    cmdclass.update({ 'build_ext': build_ext_compiler_check })
 else:
-    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],extra_compile_args=['/openmp'],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],language="c++")]
     
 setup(
     name = 'pyoctree',
