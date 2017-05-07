@@ -30,18 +30,24 @@ else:
 
 # Supply correct openmp compiler arguments depending on os. Based on SO question:
 # http://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
+# From http://stackoverflow.com/questions/16737260/how-to-tell-distutils-to-use-gcc, the distutils --compiler 
+# option expects "unix", "msvc", "cygwin", "mingw32", "bcpp", or "emx".
 BUILD_ARGS = {}
 BUILD_ARGS['msvc']    = ['/openmp', '/EHsc', ]
 BUILD_ARGS['mingw32'] = ['-fopenmp', ]
-BUILD_ARGS['gcc']     = ['-fopenmp', ]
-BUILD_ARGS['icc']     = ['-openmp',  ]
+BUILD_ARGS['unix']    = ['-fopenmp', ]  # On CentOS, "compiler" variable equals 'unix' for gcc compiler
+LINK_ARGS = {}
+LINK_ARGS['msvc']     = []
+LINK_ARGS['mingw32']  = []
+LINK_ARGS['unix']     = ['-lgomp', ]    # gcc aso requires -lgomp for linking. Otherwise get unrecognised symbol error
 
+# NOTE: Also need to differentiate between gcc, icc etc on Linux
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
         compiler = self.compiler.compiler_type
-        args = BUILD_ARGS[compiler]
         for ext in self.extensions:
-            ext.extra_compile_args = args
+            ext.extra_compile_args = BUILD_ARGS[compiler]
+            ext.extra_link_args    = LINK_ARGS[compiler]
         build_ext.build_extensions(self)
 
 cmdclass    = {}
