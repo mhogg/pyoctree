@@ -46,8 +46,10 @@ class build_ext_compiler_check(build_ext):
     def build_extensions(self):
         compiler = self.compiler.compiler_type
         for ext in self.extensions:
-            ext.extra_compile_args = BUILD_ARGS[compiler]
-            ext.extra_link_args    = LINK_ARGS[compiler]
+            if compiler in BUILD_ARGS.keys():
+                ext.extra_compile_args = BUILD_ARGS[compiler]
+            if compiler in LINK_ARGS.keys():
+                ext.extra_link_args    = LINK_ARGS[compiler]
         build_ext.build_extensions(self)
 
 cmdclass    = {}
