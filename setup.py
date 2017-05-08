@@ -30,8 +30,11 @@ else:
 
 # Supply correct openmp compiler arguments depending on os. Based on SO question:
 # http://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
+# However, need to add extra link args in addition to build args, as these are required for gcc.
 # From http://stackoverflow.com/questions/16737260/how-to-tell-distutils-to-use-gcc, the distutils --compiler 
-# option expects "unix", "msvc", "cygwin", "mingw32", "bcpp", or "emx".
+# option expects "unix", "msvc", "cygwin", "mingw32", "bcpp", or "emx". Therefore, should add support for 
+# all these, but will currently support only mscv, mingw32, and unix. 
+# The current code has been tested on Windows 10 and CentOS 6. The CentOS compiler type is "unix", which uses gcc by default. 
 BUILD_ARGS = {}
 BUILD_ARGS['msvc']    = ['/openmp', '/EHsc', ]
 BUILD_ARGS['mingw32'] = ['-fopenmp', ]
@@ -39,9 +42,9 @@ BUILD_ARGS['unix']    = ['-fopenmp', ]  # On CentOS, "compiler" variable equals 
 LINK_ARGS = {}
 LINK_ARGS['msvc']     = []
 LINK_ARGS['mingw32']  = []
-LINK_ARGS['unix']     = ['-lgomp', ]    # gcc aso requires -lgomp for linking. Otherwise get unrecognised symbol error
+LINK_ARGS['unix']     = ['-lgomp', ]    # gcc requires -lgomp for linking. Otherwise get unrecognised symbol error
 
-# NOTE: Also need to differentiate between gcc, icc etc on Linux
+# Custom class to add compiler depended build and link arguments
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
         compiler = self.compiler.compiler_type
