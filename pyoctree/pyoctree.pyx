@@ -380,10 +380,10 @@ cdef class PyOctnode:
         print('PyOctnode is managed by PyOctree: %s is read-only' % s)
         
     def __str__(self):
-        return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('PyOctnode', self.nid, self.isLeaf, self.numPolys)
+        return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('PyOctnode', self.nid.decode(), self.isLeaf, self.numPolys)
         
     def __repr__(self):
-        return "<%s %s>" % ('PyOctnode', self.nid)
+        return "<%s %s>" % ('PyOctnode', self.nid.decode())
         
     property isLeaf:
         '''Checks if node is a leaf (has no branches)'''
