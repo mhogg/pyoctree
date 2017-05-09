@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2015 Michael Hogg
+# Copyright (C) 2017 Michael Hogg
 
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
@@ -157,14 +157,15 @@ cdef class PyOctree:
         else:
             return nodeList        
                     
-    def getNodeFromId(self,string nodeId):
+    def getNodeFromId(self,str nodeId):
         '''
-        getNodeFromId(string nodeId)
+        getNodeFromId(str nodeId)
         
         Returns a PyOctnode given the node string id i.e. '0' for root and 
         '0-0' for first branch
         '''
-        cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId)
+        # Encode str nodeId to byte string before passing to C++ code
+        cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId.encode())
         if node is NULL:
             return None
         else:
@@ -453,7 +454,8 @@ cdef class PyOctnode:
     property nid:
         '''octNode node id'''
         def __get__(self):
-            return self.thisptr.nid
+            # Encode to convert from byte code to string
+            return self.thisptr.nid.encode()
         def __set__(self,_nid):
             if self.parent is None: self.thisptr.nid = _nid
             else: self.printWarningMsg('PyOctnode.nid')
