@@ -60,4 +60,5 @@ pyoctree.cpp
 .ipynb_checkpoints/
 dev/
 dist/
+pyoctree.egg-info/
 MANIFEST

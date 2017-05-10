@@ -27,11 +27,17 @@ OMP\_NUM\_THREADS to number of desired processors.
 Requirements
 ------------
 
--  vtk >= v6.2.0 (optional, for outputting a vtk file for viewing octree
+-  Python 2.7 or Python >= 3.5 
+-  vtk >= v6.2.0 or >= v7.0 (optional, for outputting a vtk file for viewing octree
    structure in Paraview)
--  Cython >= v0.20 and a C++ compiler for building the extension module. The Microsoft C++ 
-   Compiler for Python 2.7 or Mingw32 can both be used. Note that this is not required if
-   installing using the Python wheel.
+-  Cython >= v0.20 and a C++ compiler for building the extension module. Suggested compilers are:
+
+   -  *The Microsoft C++ Compiler for Python 2.7* if using Python 2
+   -  *Microsoft Visual C++ 2015 (14.0)* if using Python 3  
+   -  *gcc* on Linux
+   -  *Mingw32* on Windows or Linux 
+
+Note that a compiler is not required if installing using the provided Python wheel.
    
 Installation
 ------------
@@ -48,11 +54,11 @@ In a command prompt, browse to the base directory containing the setup.py file a
 2. Installation using Python wheel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.1.2-cp27-cp27m-win_amd64.whl. Then, open a command prompt, browse to the download directory and type:
+Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.2.0-cp27-cp27m-win_amd64.whl for Python 2.7 on Windows 64-bit. Then, open a command prompt, browse to the download directory and type:
 
 .. code::
 
-   pip install pyoctree-0.1.2-cp27-cp27m-win_amd64.whl
+   pip install pyoctree-0.2.0-cp27-cp27m-win_amd64.whl
 
 Usage
 -----
@@ -90,7 +96,7 @@ and a ray. For example:
 Examples
 --------
 
-Some IPython notebooks are provided in the Examples directory on how to
+Some Jupyter notebooks are provided in the Examples directory on how to
 use pyoctree.
 
 Help

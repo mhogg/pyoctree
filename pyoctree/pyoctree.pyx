@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2015 Michael Hogg
+# Copyright (C) 2017 Michael Hogg
 
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 # cython: profile=False
 
+from __future__ import print_function
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -108,7 +109,7 @@ cdef class PyOctree:
             self.polyList.append(PyTri_Init(tri,self))
             
     def __dealloc__(self):
-        #print "Deallocating octree"
+        #print("Deallocating octree")
         del self.thisptr
         
     def getNodesFromLabel(self,int label):
@@ -156,14 +157,15 @@ cdef class PyOctree:
         else:
             return nodeList        
                     
-    def getNodeFromId(self,string nodeId):
+    def getNodeFromId(self,str nodeId):
         '''
-        getNodeFromId(string nodeId)
+        getNodeFromId(str nodeId)
         
         Returns a PyOctnode given the node string id i.e. '0' for root and 
         '0-0' for first branch
         '''
-        cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId)
+        # Encode str nodeId to byte string before passing to C++ code
+        cdef cOctNode *node = self.thisptr.getNodeFromId(nodeId.encode())
         if node is NULL:
             return None
         else:
@@ -272,7 +274,7 @@ cdef class PyOctree:
         
         try: import vtk
         except:
-            print 'Error: Cannot import required vtk module' 
+            print('Error: Cannot import required vtk module')
             return
         
         def getTree(node):
@@ -375,7 +377,7 @@ cdef class PyOctnode:
         return False
         
     cdef printWarningMsg(self,s):
-        print 'PyOctnode is managed by PyOctree: %s is read-only' % s
+        print('PyOctnode is managed by PyOctree: %s is read-only' % s)
         
     def __str__(self):
         return "<%s, Id: %s, isLeaf: %r, numPolys: %d>" % ('PyOctnode', self.nid, self.isLeaf, self.numPolys)
@@ -452,9 +454,11 @@ cdef class PyOctnode:
     property nid:
         '''octNode node id'''
         def __get__(self):
-            return self.thisptr.nid
+            # Decode to convert from byte code to string
+            return self.thisptr.nid.decode()
         def __set__(self,_nid):
-            if self.parent is None: self.thisptr.nid = _nid
+		    # Encode to convert string to byte code before passing to C++
+            if self.parent is None: self.thisptr.nid = _nid.encode()
             else: self.printWarningMsg('PyOctnode.nid')
             
     property numPolys:
@@ -486,7 +490,7 @@ cdef class PyOctnode:
             if self.parent is None:
                 _position = np.array(_position)
                 if not (_position.shape == (3,) or _position.shape == (1,3)):
-                    print 'Error: position must be a 1x3 array'
+                    print('Error: position must be a 1x3 array')
                     return
                 for i in range(3):
                     self.thisptr.position[i] = _position[i]
@@ -512,7 +516,7 @@ cdef class PyTri:
     def __repr__(self):
         return "<%s %d>" % ('PyTri', self.label)
     cdef printWarningMsg(self,s):
-        print 'PyTri is managed by PyOctree: %s is read-only' % s
+        print('PyTri is managed by PyOctree: %s is read-only' % s)
     property label:
         '''Tri label'''
         def __get__(self):
@@ -534,7 +538,7 @@ cdef class PyTri:
                 return                
             _vertices = np.array(_vertices,dtype=np.float64)
             if _vertices.shape != (3,3):
-                print 'Error: vertices must be a 3x3 array'
+                print('Error: vertices must be a 3x3 array')
                 return
             cdef int i,j
             for i in range(3):
