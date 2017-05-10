@@ -4,6 +4,7 @@ REM Set environ as workaround for bugs (See http://stackoverflow.com/questions/2
 REM SET DISTUTILS_USE_SDK=1
 REM SET MSSdk=1
 
+REM Set variables for Microsoft Visual Studio for Python 3.6 
 @call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
 
 REM Test build
