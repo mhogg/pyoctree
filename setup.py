@@ -4,7 +4,7 @@
 
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from codecs import open
 from os import path
@@ -75,7 +75,7 @@ setup(
     author_email = 'michael.christopher.hogg@gmail.com',
     url = "https://github.com/mhogg/pyoctree",
     download_url = "https://github.com/mhogg/pyoctree/releases", 
-    packages = ['','pyoctree'],
+    packages = find_packages(),
     package_data = {'':['LICENSE.txt','README.md','setup.py','Examples/*']},
     classifiers = [
         "Development Status :: 4 - Beta",
