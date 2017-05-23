@@ -24,6 +24,7 @@ exec(open(path.join('pyoctree','version.py')).read())
 try:
     from Cython.Distutils import build_ext
 except ImportError:
+    from setuptools.command import build_ext
     use_cython = False
 else:
     use_cython = True
