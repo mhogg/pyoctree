@@ -457,7 +457,7 @@ cdef class PyOctnode:
             # Decode to convert from byte code to string
             return self.thisptr.nid.decode()
         def __set__(self,_nid):
-		    # Encode to convert string to byte code before passing to C++
+            # Encode to convert string to byte code before passing to C++
             if self.parent is None: self.thisptr.nid = _nid.encode()
             else: self.printWarningMsg('PyOctnode.nid')
             
