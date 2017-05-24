@@ -4,7 +4,7 @@
 
 # This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from codecs import open
 from os import path
@@ -70,13 +70,15 @@ setup(
     description = 'Octree structure containing 3D triangular mesh model',
     long_description = readme(),
     license = 'MIT license',
-    keywords = ["octree","triangle","mesh","python","cython"],    
+    keywords = ["octree","triangle","mesh","python","cython","ray","tracing"],    
     author = 'Michael Hogg',
     author_email = 'michael.christopher.hogg@gmail.com',
     url = "https://github.com/mhogg/pyoctree",
     download_url = "https://github.com/mhogg/pyoctree/releases", 
-    packages = ['','pyoctree'],
-    package_data = {'':['LICENSE.txt','README.md','setup.py','Examples/*']},
+    packages = find_packages(),
+    package_data = {'readme':   ['README.rst'],
+                    'license':  ['LICENSE.txt'],
+                    'examples': [path.join('Examples','*')]},
     classifiers = [
         "Development Status :: 4 - Beta",
         "Environment :: Other Environment",
