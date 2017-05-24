@@ -32,8 +32,8 @@ Requirements
    structure in Paraview)
 -  Cython >= v0.20 and a C++ compiler for building the extension module. Suggested compilers are:
 
-   -  *The Microsoft C++ Compiler for Python 2.7* if using Python 2
-   -  *Microsoft Visual C++ 2015 (14.0)* if using Python 3  
+   -  *The Microsoft C++ Compiler for Python 2.7* if using Python 2 on Windows
+   -  *Microsoft Visual C++ 2015 (14.0)* if using Python 3 on Windows
    -  *gcc* on Linux
    -  *Mingw32* on Windows or Linux 
 
