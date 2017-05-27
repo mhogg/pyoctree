@@ -76,9 +76,9 @@ setup(
     url = "https://github.com/mhogg/pyoctree",
     download_url = "https://github.com/mhogg/pyoctree/releases", 
     packages = find_packages(),
-    package_data = {'readme':   ['README.rst'],
-                    'license':  ['LICENSE.txt'],
-                    'examples': [path.join('Examples','*')]},
+    include_package_data = True,
+    package_data = {'': ['README.rst','LICENSE.txt'],
+                    'pyoctree': ['Examples\*']},				
     classifiers = [
         "Development Status :: 4 - Beta",
         "Environment :: Other Environment",

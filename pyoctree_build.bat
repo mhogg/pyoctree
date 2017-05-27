@@ -5,9 +5,13 @@ REM SET DISTUTILS_USE_SDK=1
 REM SET MSSdk=1
 
 REM Set variables for Microsoft Visual Studio for Python 3.6 
-@call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+REM @call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+
+REM Cythonize pyx file to cpp (for users without Cython installed)
+cython pyoctree\pyoctree.pyx --cplus
 
 REM Test build
-python setup.py sdist bdist_wheel
+REM python setup.py sdist bdist_wheel
+
 REM Upload to PyPi
-REM python setup.py sdist bdist_wheel upload
+REM twine upload dist/*
