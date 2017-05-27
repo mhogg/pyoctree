@@ -1,6 +1,6 @@
 include *.in
 include *.txt
-include *.md
+include *.rst
 recursive-include pyoctree *.pyd
 recursive-include pyoctree *.pyx
 recursive-include pyoctree *.h
