@@ -54,11 +54,11 @@ In a command prompt, browse to the base directory containing the setup.py file a
 2. Installation using Python wheel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.2.0-cp27-cp27m-win_amd64.whl for Python 2.7 on Windows 64-bit. Then, open a command prompt, browse to the download directory and type:
+Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.2.2-cp27-cp27m-win_amd64.whl for Python 2.7 on Windows 64-bit. Then, open a command prompt, browse to the download directory and type:
 
 .. code::
 
-   pip install pyoctree-0.2.0-cp27-cp27m-win_amd64.whl
+   pip install pyoctree-0.2.2-cp27-cp27m-win_amd64.whl
 
 Usage
 -----

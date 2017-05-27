@@ -14,4 +14,4 @@ REM Test build
 REM python setup.py sdist bdist_wheel
 
 REM Upload to PyPi
-REM twine upload dist/*
+REM twine upload dist\*

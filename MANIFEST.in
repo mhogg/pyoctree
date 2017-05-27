@@ -5,4 +5,4 @@ recursive-include pyoctree *.pyd
 recursive-include pyoctree *.pyx
 recursive-include pyoctree *.h
 recursive-include pyoctree *.cpp
-recursive-include Examples *.*
+recursive-include pyoctree\Examples *.*
