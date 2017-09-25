@@ -18,6 +18,7 @@ REM Python 3.6
 REM ----------
 
 REM Activate Python 3.6
+@call activate python36
 
 REM Set variables for Microsoft Visual Studio for Python 3.6 
 @call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
