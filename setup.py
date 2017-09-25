@@ -9,16 +9,26 @@ from setuptools.extension import Extension
 from codecs import open
 from os import path
 import numpy
+import sys
 
-# get current path
+# Get current path
 here = path.abspath(path.dirname(__file__))
 
-# function to open the readme file
+# Function to open the readme file
 def readme():
     with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
         return f.read()
+
+# Function to parse command line arguments to check for openmp option. Modified from kwikteam/klustakwik2/setup.py
+def parse_cmdline_args(arg):
+    try:
+        sys.argv.remove('--%s' % arg)
+        return True
+    except ValueError:
+        pass
+    return False
         
-# find the version
+# Find the version
 exec(open(path.join('pyoctree','version.py')).read())
 
 try:
@@ -28,6 +38,9 @@ except ImportError:
     use_cython = False
 else:
     use_cython = True
+
+# Check if user wants to use openmp
+use_openmp = parse_cmdline_args('openmp')
 
 # Supply correct openmp compiler arguments depending on os. Based on SO question:
 # http://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
@@ -48,12 +61,13 @@ LINK_ARGS['unix']     = ['-lgomp', ]    # gcc requires -lgomp for linking. Other
 # Custom class to add compiler depended build and link arguments
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
-        compiler = self.compiler.compiler_type
-        for ext in self.extensions:
-            if compiler in BUILD_ARGS:
-                ext.extra_compile_args = BUILD_ARGS[compiler]
-            if compiler in LINK_ARGS:
-                ext.extra_link_args    = LINK_ARGS[compiler]
+        if use_openmp:
+            compiler = self.compiler.compiler_type
+            for ext in self.extensions:
+                if compiler in BUILD_ARGS:
+                    ext.extra_compile_args = BUILD_ARGS[compiler]
+                if compiler in LINK_ARGS:
+                    ext.extra_link_args    = LINK_ARGS[compiler]
         build_ext.build_extensions(self)
 
 cmdclass    = {}
