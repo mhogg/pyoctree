@@ -25,11 +25,12 @@ Optional
 --------
 
 -  vtk >= v6.2.0 or >= v7.0 (for outputting a vtk file for viewing octree structure in Paraview)
--  Cython >= v0.20 and a C++ compiler for building the extension module from source. Suggested compilers are:
+-  A C++ compiler for building the extension module from the provided cpp file (already cythonized). Suggested compilers are:
    -  *The Microsoft C++ Compiler for Python 2.7* if using Python 2 on Windows
    -  *Microsoft Visual C++ 2015 (14.0)* if using Python 3 on Windows
    -  *gcc* on Linux
    -  *Mingw32* on Windows or Linux 
+- Cython >= v0.20 and a C++ compiler to build from source     
 
 Note that a compiler is not required if installing using the provided Python wheel.
    
@@ -41,7 +42,7 @@ single processor, use the provided Python wheel or compile from source using a
 compiler that supports OpenMP. Then set value of environment variable
 OMP\_NUM\_THREADS to the number of desired processors.
 
-Note that the compilers provided by the Anaconda Python distribution do not support OpenMP.
+Note that the compilers provided by the Anaconda Python distribution *do not* support OpenMP.
 
 1. Building from source
 ~~~~~~~~~~~~~~~~~~~~~~~
