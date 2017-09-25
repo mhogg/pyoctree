@@ -10,28 +10,22 @@ Written in C++ for speed, but exposed to Python using Cython.
    :target: https://pypi.python.org/pypi/pyoctree/
    :alt: Latest PyPI version
    
-.. image:: https://img.shields.io/pypi/dm/pyoctree.svg
-   :target: https://pypi.python.org/pypi/pyoctree/
-   :alt: Number of PyPI downloads
-   
 Details
 -------
 
 Pyoctree uses an adaptive structure, so it will automatically divide
 branches to ensure that there are no more than 200 objects per leaf.
 
-Intersection testing uses parallel processing via OpenMP. To use more
-than a single processor, set value of environment variable
-OMP\_NUM\_THREADS to number of desired processors.
-
 Requirements
 ------------
 
--  Python 2.7 or Python >= 3.5 
--  vtk >= v6.2.0 or >= v7.0 (optional, for outputting a vtk file for viewing octree
-   structure in Paraview)
--  Cython >= v0.20 and a C++ compiler for building the extension module. Suggested compilers are:
+-  Python 2.7 or Python >= 3.5
 
+Optional
+--------
+
+-  vtk >= v6.2.0 or >= v7.0 (for outputting a vtk file for viewing octree structure in Paraview)
+-  Cython >= v0.20 and a C++ compiler for building the extension module from source. Suggested compilers are:
    -  *The Microsoft C++ Compiler for Python 2.7* if using Python 2 on Windows
    -  *Microsoft Visual C++ 2015 (14.0)* if using Python 3 on Windows
    -  *gcc* on Linux
@@ -42,23 +36,38 @@ Note that a compiler is not required if installing using the provided Python whe
 Installation
 ------------
 
+Intersection testing uses parallel processing via OpenMP. To use more than a 
+single processor, use the provided Python wheel or compile from source using a 
+compiler that supports OpenMP. Then set value of environment variable
+OMP\_NUM\_THREADS to the number of desired processors.
+
+Note that the compilers provided by the Anaconda Python distribution do not support OpenMP.
+
 1. Building from source
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-In a command prompt, browse to the base directory containing the setup.py file and type:
+To compile *without* OpenMP, open a command prompt, browse to the base directory containing the setup.py file and type:
 
 .. code::
 
    python setup.py install
-
-2. Installation using Python wheel
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. pyoctree-0.2.2-cp27-cp27m-win_amd64.whl for Python 2.7 on Windows 64-bit. Then, open a command prompt, browse to the download directory and type:
+   
+To compile *with* OpenMP, open a command prompt, browse to the base directory containing the setup.py file and type:
 
 .. code::
 
-   pip install pyoctree-0.2.2-cp27-cp27m-win_amd64.whl
+    python setup.py install --openmp
+   
+2. Installation using Python wheel
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. 
+pyoctree-0.2.3-cp27-cp27m-win_amd64.whl for Python 2.7 on Windows 64-bit. Then, open a command 
+prompt, browse to the download directory and type:
+
+.. code::
+
+   pip install pyoctree-0.2.3-cp27-cp27m-win_amd64.whl
 
 Usage
 -----
