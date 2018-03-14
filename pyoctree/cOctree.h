@@ -23,10 +23,11 @@ using namespace std;
 
 typedef struct intersection
 {
+    int triLabel;
     double s;
     vector<double> p;
-    intersection() { p.resize(3,0.0); s=0.0; }
-    intersection(vector<double> _p, double _s) { p=_p; s=_s;}
+    intersection() { triLabel=0; p.resize(3,0.0); s=0.0; }
+    intersection(int _triLabel, vector<double> _p, double _s) { triLabel=_triLabel; p=_p; s=_s;}
     // Overload operator < so we can use sort function of a std::vector
     bool operator < (const intersection& intersect) const { 
         return (s < intersect.s); }

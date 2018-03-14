@@ -20,6 +20,7 @@ ctypedef np.int32_t int32
 cdef extern from "cOctree.h":
 
     cdef cppclass Intersection:
+        int triLabel
         double s
         vector[double] p
     
@@ -216,7 +217,7 @@ cdef class PyOctree:
         intList = []
         for i in range(numInts):
             intsect = Intersect()
-            intsect.SetValues(intersectList[i].p,intersectList[i].s)
+            intsect.SetValues(intersectList[i].triLabel,intersectList[i].p,intersectList[i].s)
             intList.append(intsect)
         return intList
 
@@ -335,14 +336,17 @@ cdef class PyOctree:
 cdef class Intersect:
     cdef public double s
     cdef public np.ndarray p
+    cdef public int triLabel
     def __init__(self):
-        self.s = 0.0
         self.p = np.zeros(3,dtype=float)
-    cdef SetValues(self,vector[double] p, double s):
+        self.s = 0.0
+        self.triLabel = 0
+    cdef SetValues(self, int triLabel, vector[double] p, double s):
         cdef int i
         for i in range(3):
             self.p[i] = p[i]
         self.s = s
+        self.triLabel = triLabel
         
               
 cdef class PyOctnode:
