@@ -108,4 +108,5 @@ setup(
         ],
     ext_modules = ext_modules,
     cmdclass = cmdclass,
+    install_requires = ["numpy"],
 )

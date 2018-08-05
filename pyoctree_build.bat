@@ -30,4 +30,4 @@ REM Upload entire dist folder to PyPi
 REM ---------------------------------
 
 REM Upload to PyPi
-REM twine upload dist\*
+twine upload dist\*
