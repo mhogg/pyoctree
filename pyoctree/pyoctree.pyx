@@ -20,6 +20,7 @@ ctypedef np.int32_t int32
 cdef extern from "cOctree.h":
 
     cdef cppclass Intersection:
+        int triLabel
         double s
         vector[double] p
     
@@ -78,6 +79,8 @@ cdef class PyOctree:
         cdef vector[double] coords
         cdef vector[vector[double]] vertexCoords3D
         
+        print("Setting up vertexCoords3D")
+        vertexCoords3D.reserve(_vertexCoords3D.shape[0])
         coords.resize(3)
         for i in range(_vertexCoords3D.shape[0]):
             for j in range(3):
@@ -87,6 +90,8 @@ cdef class PyOctree:
         cdef vector[int] connect
         cdef vector[vector[int]] polyConnectivity
         
+        print("Setting up polyConnectivity")
+        polyConnectivity.reserve(_polyConnectivity.shape[0])
         connect.resize(3)
         for i in range(_polyConnectivity.shape[0]):
             for j in range(3):
@@ -94,6 +99,7 @@ cdef class PyOctree:
             polyConnectivity.push_back(connect)
             
         # Create cOctree
+        print("Creating cOctree")
         self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)
             
         # Get root node
@@ -102,6 +108,7 @@ cdef class PyOctree:
         node = NULL
         
         # Get polyList
+        print("Setting up tree polyList")
         self.polyList = []
         cdef cTri *tri 
         for i in range(self.thisptr.polyList.size()):
@@ -216,7 +223,7 @@ cdef class PyOctree:
         intList = []
         for i in range(numInts):
             intsect = Intersect()
-            intsect.SetValues(intersectList[i].p,intersectList[i].s)
+            intsect.SetValues(intersectList[i].triLabel,intersectList[i].p,intersectList[i].s)
             intList.append(intsect)
         return intList
 
@@ -335,14 +342,17 @@ cdef class PyOctree:
 cdef class Intersect:
     cdef public double s
     cdef public np.ndarray p
+    cdef public int triLabel
     def __init__(self):
-        self.s = 0.0
         self.p = np.zeros(3,dtype=float)
-    cdef SetValues(self,vector[double] p, double s):
+        self.s = 0.0
+        self.triLabel = 0
+    cdef SetValues(self, int triLabel, vector[double] p, double s):
         cdef int i
         for i in range(3):
             self.p[i] = p[i]
         self.s = s
+        self.triLabel = triLabel
         
               
 cdef class PyOctnode:
