@@ -8,7 +8,6 @@ from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from codecs import open
 from os import path
-import numpy
 import sys
 
 # Get current path
@@ -58,8 +57,15 @@ LINK_ARGS['msvc']     = []
 LINK_ARGS['mingw32']  = []
 LINK_ARGS['unix']     = ['-lgomp', ]    # gcc requires -lgomp for linking. Otherwise get unrecognised symbol error
 
+# Custom class to add required dependencies for building the project
+class build_ext_dependencies(build_ext):
+    def finalize_options(self):
+        build_ext.finalize_options(self)
+        import numpy
+        self.include_dirs.append(numpy.get_include())
+
 # Custom class to add compiler depended build and link arguments
-class build_ext_compiler_check(build_ext):
+class build_ext_compiler_check(build_ext_dependencies):
     def build_extensions(self):
         if use_openmp:
             compiler = self.compiler.compiler_type
@@ -70,13 +76,14 @@ class build_ext_compiler_check(build_ext):
                     ext.extra_link_args    = LINK_ARGS[compiler]
         build_ext.build_extensions(self)
 
-cmdclass    = {}
+cmdclass    = { "build_ext": build_ext_dependencies }
 ext_modules = []
 if use_cython:  
-    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.pyx","pyoctree/cOctree.cpp"],language="c++")]
     cmdclass.update({ 'build_ext': build_ext_compiler_check })
 else:
-    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cOctree.cpp"],include_dirs=[numpy.get_include()],language="c++")]
+    ext_modules += [ Extension("pyoctree.pyoctree", sources=["pyoctree/pyoctree.cpp","pyoctree/cOctree.cpp"],language="c++")]
+    cmdclass.update({ 'build_ext': build_ext_dependencies })
     
 setup(
     name = 'pyoctree',
@@ -108,5 +115,6 @@ setup(
         ],
     ext_modules = ext_modules,
     cmdclass = cmdclass,
+    setup_requires = ["numpy"],
     install_requires = ["numpy"],
 )
