@@ -64,12 +64,12 @@ To compile *with* OpenMP, open a command prompt, browse to the base directory co
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download the python wheel from `releases <https://github.com/mhogg/pyoctree/releases>`_ i.e. 
-pyoctree-0.2.9-cp36-cp36m-win_amd64.whl for Python 3.6 on Windows 64-bit. Then, open a command 
+pyoctree-0.2.10-cp36-cp36m-win_amd64.whl for Python 3.6 on Windows 64-bit. Then, open a command 
 prompt, browse to the download directory and type:
 
 .. code::
 
-   pip install pyoctree-0.2.9-cp36-cp36m-win_amd64.whl
+   pip install pyoctree-0.2.10-cp36-cp36m-win_amd64.whl
    
 Note that Python wheels have been built *with* OpenMP.
 

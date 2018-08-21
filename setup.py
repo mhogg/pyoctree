@@ -15,7 +15,7 @@ here = path.abspath(path.dirname(__file__))
 
 # Function to open the readme file
 def readme():
-    with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+    with open(path.join(here, 'README.rst')) as f:
         return f.read()
 long_description = readme()
 
