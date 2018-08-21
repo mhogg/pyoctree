@@ -23,8 +23,12 @@ REM @call activate python36
 REM Set variables for Microsoft Visual Studio for Python 3.6 
 @call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
 
+REM Cythonize pyx file to cpp (for users without Cython installed)
+del pyoctree\pyoctree.cpp
+cython pyoctree\pyoctree.pyx --cplus
+
 REM Build Python 3.6 wheel - With openmp
-python setup.py bdist_wheel --openmp
+python setup.py sdist bdist_wheel --openmp
 
 REM Upload entire dist folder to PyPi
 REM ---------------------------------

@@ -18,6 +18,7 @@ here = path.abspath(path.dirname(__file__))
 def readme():
     with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
         return f.read()
+long_description = readme()
 
 # Function to parse command line arguments to check for openmp option. Modified from kwikteam/klustakwik2/setup.py
 def parse_cmdline_args(arg):
@@ -82,7 +83,7 @@ setup(
     name = 'pyoctree',
     version = __version__,
     description = 'Octree structure containing 3D triangular mesh model',
-    long_description = readme(),
+    long_description = long_description,
     license = 'MIT license',
     keywords = ["octree","triangle","mesh","python","cython","ray","tracing"],    
     author = 'Michael Hogg',

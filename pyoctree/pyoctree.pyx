@@ -79,7 +79,7 @@ cdef class PyOctree:
         cdef vector[double] coords
         cdef vector[vector[double]] vertexCoords3D
         
-        print("Setting up vertexCoords3D")
+        #print("Setting up vertexCoords3D")
         vertexCoords3D.reserve(_vertexCoords3D.shape[0])
         coords.resize(3)
         for i in range(_vertexCoords3D.shape[0]):
@@ -90,7 +90,7 @@ cdef class PyOctree:
         cdef vector[int] connect
         cdef vector[vector[int]] polyConnectivity
         
-        print("Setting up polyConnectivity")
+        #print("Setting up polyConnectivity")
         polyConnectivity.reserve(_polyConnectivity.shape[0])
         connect.resize(3)
         for i in range(_polyConnectivity.shape[0]):
@@ -99,7 +99,7 @@ cdef class PyOctree:
             polyConnectivity.push_back(connect)
             
         # Create cOctree
-        print("Creating cOctree")
+        #print("Creating cOctree")
         self.thisptr = new cOctree(vertexCoords3D,polyConnectivity)
             
         # Get root node
@@ -108,7 +108,7 @@ cdef class PyOctree:
         node = NULL
         
         # Get polyList
-        print("Setting up tree polyList")
+        #print("Setting up tree polyList")
         self.polyList = []
         cdef cTri *tri 
         for i in range(self.thisptr.polyList.size()):
