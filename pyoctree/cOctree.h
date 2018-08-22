@@ -4,6 +4,7 @@
 // This file is part of pyoctree - See LICENSE.txt for information on usage and redistribution
 
 #include <iostream>
+#include <numeric>
 #include <vector>
 #include <set>
 #include <stdlib.h>
@@ -49,7 +50,7 @@ public:
 
     static const int MAX_OCTNODE_OBJECTS  = 200;
     static const int NUM_BRANCHES_OCTNODE = 8;  
-    double size;
+    double size, radius;
     int level;
     string nid;
     vector<double> position;
@@ -71,10 +72,10 @@ public:
 class cTri {
 public:
 
-    double D;
+    double D, d00, d01, d11, denom;
     int label;
     vector<vector<double> > vertices;
-    vector<double> N;
+    vector<double> N, v0, v1;
     vector<double> lowVert, uppVert;
     cTri();
     cTri(int _label, vector<vector<double> > _vertices);
@@ -83,6 +84,7 @@ public:
     bool isPointInTri(vector<double> &p);
     bool rayPlaneIntersectPoint(cLine &ray, bool entryOnly);
     bool rayPlaneIntersectPoint(cLine &ray, vector<double> &p, double &s);
+    void getBase();
     void getN();
     void getD();
     void getLowerVert();

@@ -63,10 +63,12 @@ cTri::cTri()
     for (vector<vector<double> >::iterator it=vertices.begin(); it!=vertices.end(); ++it)
         (*it).resize(3,0.0);
     vertices[1][0]=1.0; vertices[2][1]=1.0;
+
+    getBase();
     getN();
     getD();
     getLowerVert();
-    getUpperVert();    
+    getUpperVert();
 }
 
 cTri::cTri(int _label, vector<vector<double> > _vertices)
@@ -74,6 +76,8 @@ cTri::cTri(int _label, vector<vector<double> > _vertices)
     // cTri constructor with label and vertices
     label    = _label;
     vertices = _vertices;
+
+    getBase();
     getN();
     getD();
     getLowerVert();
@@ -85,17 +89,23 @@ cTri::~cTri() {
     //cout << "Destroying cTri" << endl;
 }
 
+void cTri::getBase()
+{
+    // Get cTri base vectors and other related quantities
+    v0 = vectSubtract(vertices[1],vertices[0]);
+    v1 = vectSubtract(vertices[2],vertices[0]);
+    d00 = dotProduct(v0, v0);
+    d01 = dotProduct(v0, v1);
+    d11 = dotProduct(v1, v1);
+    denom = d00 * d11 - d01 * d01;
+}
+
 void cTri::getN()
 {
     // Get cTri face normal
-    vector<vector<double> > v = vertices;
-    vector<double> v1(3),v2(3),v3;
-    for (unsigned int i=0; i<3; i++) {
-        v1[i] = v[0][i] - v[1][i];
-        v2[i] = v[0][i] - v[2][i]; }
-    v3 = crossProduct(v1,v2);
-    double v3mag = sqrt(dotProduct(v3,v3));
-    N = v3;
+    vector<vector<double>> v = vertices;
+    N = crossProduct(v0,v1);
+    double v3mag = sqrt(dotProduct(N,N));
     for (vector<double>::iterator it=N.begin(); it!=N.end(); ++it)
         *it /= v3mag;
 }
@@ -155,15 +165,10 @@ bool cTri::isPointInTri(vector<double> &p)
     // testing the barycentric coordinates (u, v, w) of p
 
     // Find Barycentric coordinates of point (u,v,w)
-    vector<double> v0 = vectSubtract(vertices[1],vertices[0]);
-    vector<double> v1 = vectSubtract(vertices[2],vertices[0]);
     vector<double> v2 = vectSubtract(p,vertices[0]);
-    double d00 = dotProduct(v0, v0);
-    double d01 = dotProduct(v0, v1);
-    double d11 = dotProduct(v1, v1);
     double d20 = dotProduct(v2, v0);
     double d21 = dotProduct(v2, v1);
-    double denom = d00 * d11 - d01 * d01;
+
     double v = (d11 * d20 - d01 * d21) / denom;
     double w = (d00 * d21 - d01 * d20) / denom;
     double u = 1.0 - v - w;
@@ -253,6 +258,8 @@ void cOctNode::getLowUppVerts()
         low[i] = position[i] - halfSize;
         upp[i] = position[i] + halfSize;
     }
+    // Radius of sphere that contains node
+    radius = distBetweenPoints(low,position);
 }
 
 void cOctNode::addPoly(int _indx) { data.push_back(_indx); }
@@ -267,20 +274,16 @@ void cOctNode::addNode(int _level, string _nid, vector<double> _position, double
 bool cOctNode::sphereRayIntersect(cLine &ray)
 {
     // Quick test for determining if a ray is *likely* to intersect a given node
-
-    // Radius of sphere that contains node
-    double radius = distBetweenPoints(low,position);
     
     // Project centre of sphere (node.position) onto ray
     vector<double> oc = vectSubtract(position, ray.p0);
     double s = dotProduct(oc,ray.dir);
     vector<double> projpnt = vectAdd(ray.p0, ray.dir, s);
-    double dist = distBetweenPoints(projpnt,position);
     
     // If distance between spherical centre and projected point is 
     // less than the radius of the sphere, then an intersection is
     // *possible*
-    return (dist<=radius);
+    return (distBetweenPoints(projpnt,position)<=radius);
 }
 
 bool cOctNode::boxRayIntersect(cLine &ray)
@@ -666,20 +669,17 @@ vector<int> cOctree::findRayIntersectsSorted(vector<cLine> &rayList)
 double dotProduct(vector<double> &v1, vector<double> &v2)
 {
     // Calculates dot product v1.v2
-    double dp=0.0;
-    for (unsigned int i=0; i<3; i++)
-        dp += v1[i]*v2[i]; 
-    return dp;
+    return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
 }
 
 double distBetweenPoints(vector<double> &p1, vector<double> &p2)
 {
     // Calculate the distance between points p1 and p2, |p1-p2|
-    double sum=0.0;
-    for (unsigned int i=0; i<3; i++)
-        sum += pow((p1[i]-p2[i]),2.0);
-    sum = sqrt(sum);
-    return sum;
+    double a0, a1, a2;
+    a0 = p1[0]-p2[0];
+    a1 = p1[1]-p2[1];
+    a2 = p1[2]-p2[2];
+    return sqrt(a0*a0 + a1*a1 + a2*a2);
 }
 
 vector<double> crossProduct(vector<double> &v1, vector<double> &v2)
@@ -701,17 +701,19 @@ vector<double> vectAdd( vector<double> &a, vector<double> &b )
 vector<double> vectAdd( vector<double> &a, vector<double> &b, double sf )
 {
     // Vector addition and scaling, c=a+sf*b
-    vector<double> c(a.size());
-    for (unsigned int i=0; i<a.size(); i++)
-        c[i] = a[i] + sf*b[i];
+    vector<double> c(3);
+    c[0] = a[0] + sf*b[0];
+    c[1] = a[1] + sf*b[1];
+    c[2] = a[2] + sf*b[2];
     return c;
 }
 vector<double> vectSubtract( vector<double> &a, vector<double> &b )
 {
     // Vector subtraction, c=a-b
-    vector<double> c(a.size());
-    for (unsigned int i=0; i<a.size(); i++)
-        c[i] = a[i]-b[i];
+    vector<double> c(3);
+    c[0] = a[0]-b[0];
+    c[1] = a[1]-b[1];
+    c[2] = a[2]-b[2];
     return c;
 }
 
