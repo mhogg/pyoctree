@@ -138,9 +138,9 @@ cdef class PyOctree:
         else:
             return nodeList     
             
-    def getNodesFromRay(self,np.ndarray[float,ndim=2] _rayPoints):
+    def getNodesFromRay(self,np.ndarray[float64,ndim=2] _rayPoints):
         '''
-        getNodesFromRay(np.ndarray[float,ndim=2] _rayPoints)
+        getNodesFromRay(np.ndarray[float64,ndim=2] _rayPoints)
         
         Returns a list of PyOctnodes that intersect with the given ray. The 
         nodes are sorted in order of distance from the ray origin
@@ -178,9 +178,9 @@ cdef class PyOctree:
         else:
             return PyOctnode_Init(node,self)   
 
-    def getListOfPolysToCheck(self,np.ndarray[float,ndim=2] _rayPoints):
+    def getListOfPolysToCheck(self,np.ndarray[float64,ndim=2] _rayPoints):
         '''
-        getListOfPolysToCheck(np.ndarray[float,ndim=2] _rayPoints)
+        getListOfPolysToCheck(np.ndarray[float64,ndim=2] _rayPoints)
         
         Returns a list of polygons that should be tested for intersections with
         the given ray
@@ -203,9 +203,9 @@ cdef class PyOctree:
             inc(it)
         return s
         
-    def rayIntersection(self,np.ndarray[float,ndim=2] _rayPoints):
+    def rayIntersection(self,np.ndarray[float64,ndim=2] _rayPoints):
         '''
-        rayIntersection(np.ndarray[float,ndim=2] _rayPoints)
+        rayIntersection(np.ndarray[float64,ndim=2] _rayPoints)
         
         Finds and returns a list of all intersection points between the tree
         polys and the given ray 
@@ -227,9 +227,9 @@ cdef class PyOctree:
             intList.append(intsect)
         return intList
 
-    def rayIntersections(self,np.ndarray[float,ndim=3] _rayList):
+    def rayIntersections(self,np.ndarray[float64,ndim=3] _rayList):
         '''
-        rayIntersections(np.ndarray[float,ndim=3] _rayList
+        rayIntersections(np.ndarray[float64,ndim=3] _rayList
         
         For every ray in the list provided, returns a corresponding array of 
         integers indicating if a intersection occurred or not. This array can
@@ -344,7 +344,7 @@ cdef class Intersect:
     cdef public np.ndarray p
     cdef public int triLabel
     def __init__(self):
-        self.p = np.zeros(3,dtype=float)
+        self.p = np.zeros(3,dtype=np.float64)
         self.s = 0.0
         self.triLabel = 0
     cdef SetValues(self, int triLabel, vector[double] p, double s):
