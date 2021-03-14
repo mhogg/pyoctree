@@ -103,7 +103,7 @@ and a ray. For example:
     import numpy as np
     startPoint = [0.0,0.0,0.0]
     endPoint   = [0.0,0.0,1.0]
-    rayList    = np.array([[startPoint,endPoint]],dtype=np.float32)
+    rayList    = np.array([[startPoint,endPoint]])
     intersectionFound  = tree.rayIntersection(rayList)
 
 Examples
